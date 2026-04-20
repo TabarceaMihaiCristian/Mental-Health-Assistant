@@ -1,0 +1,41 @@
+"""Expose ORM metadata and import models for migration discovery."""
+
+from app.models import (
+    AuthIdentity,
+    Appointment,
+    Base,
+    ChatMessage,
+    ChatSession,
+    DailyMoodSummary,
+    MoodAnalysis,
+    Notification,
+    Report,
+    RiskEvent,
+    Specialist,
+    SpecialistAvailabilityRule,
+    SpecialistBreak,
+    SpecialistReview,
+    SpecialistTimeOff,
+    User,
+    UserProfile,
+)
+
+__all__ = [
+    "AuthIdentity",
+    "Appointment",
+    "Base",
+    "ChatMessage",
+    "ChatSession",
+    "DailyMoodSummary",
+    "MoodAnalysis",
+    "Notification",
+    "Report",
+    "RiskEvent",
+    "Specialist",
+    "SpecialistAvailabilityRule",
+    "SpecialistBreak",
+    "SpecialistReview",
+    "SpecialistTimeOff",
+    "User",
+    "UserProfile",
+]

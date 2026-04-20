@@ -1,0 +1,11 @@
+alembic
+apscheduler
+email-validator
+fastapi
+openai
+passlib[bcrypt]
+pydantic-settings
+psycopg[binary]
+python-jose[cryptography]
+sqlalchemy
+uvicorn
