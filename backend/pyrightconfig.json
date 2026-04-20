@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/pyright/config.schema.json",
+  "include": [
+    "app",
+    "tests"
+  ],
+  "exclude": [
+    ".venv",
+    ".venv_tmp",
+    ".pytest_cache",
+    ".ruff_cache",
+    "alembic"
+  ],
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.13",
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownLambdaType": false,
+  "reportUnknownParameterType": false,
+  "reportUntypedFunctionDecorator": false,
+  "reportUntypedBaseClass": false,
+  "reportUntypedNamedTuple": false,
+  "reportPrivateImportUsage": false
+}
