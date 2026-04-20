@@ -74,6 +74,7 @@ class User(Base, TimestampMixin):
         "Appointment",
         back_populates="user",
         cascade=DELETE_ORPHAN_CASCADE,
+        foreign_keys="Appointment.user_id",
     )
     specialist_reviews: Mapped[list[SpecialistReview]] = relationship(
         "SpecialistReview",

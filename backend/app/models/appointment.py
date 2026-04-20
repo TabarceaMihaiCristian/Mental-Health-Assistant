@@ -70,5 +70,9 @@ class Appointment(Base, TimestampMixin):
         index=True,
     )
 
-    user: Mapped[User] = relationship("User", back_populates="appointments")
+    user: Mapped[User] = relationship(
+        "User",
+        back_populates="appointments",
+        foreign_keys=[user_id],
+    )
     specialist: Mapped[Specialist] = relationship("Specialist", back_populates="appointments")
