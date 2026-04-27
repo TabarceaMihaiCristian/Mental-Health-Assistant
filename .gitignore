@@ -63,6 +63,8 @@ instance/
 .env
 .env.*
 !.env.example
+!backend/.env.example
+!backend/.env.production.example
 .venv/
 venv/
 env/

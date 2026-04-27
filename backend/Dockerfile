@@ -8,10 +8,15 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt \
+    && addgroup --system app \
+    && adduser --system --ingroup app app
 
-COPY . .
+COPY --chown=app:app . .
+
+USER app
 
 EXPOSE 8000
 
+ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
