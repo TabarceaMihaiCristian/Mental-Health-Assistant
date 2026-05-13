@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.auth_identity import AuthIdentity
 from app.models.enums import AuthProvider
@@ -25,10 +27,18 @@ class UserRepository:
         self.db.flush()
         return user
 
-    def get_by_id(self, user_id) -> User | None:
-        """Return a user by primary key."""
+    def get_by_id(self, user_id: UUID) -> User | None:
+        """Return a user by primary key with profile and identities loaded."""
 
-        return self.db.get(User, user_id)
+        statement = (
+            select(User)
+            .options(
+                selectinload(User.profile),
+                selectinload(User.auth_identities),
+            )
+            .where(User.id == user_id)
+        )
+        return self.db.scalar(statement)
 
 
 class AuthIdentityRepository:
@@ -52,5 +62,18 @@ class AuthIdentityRepository:
         statement = select(AuthIdentity).where(
             AuthIdentity.provider == AuthProvider.LOCAL,
             func.lower(AuthIdentity.email) == email,
+        )
+        return self.db.scalar(statement)
+
+    def get_local_identity_for_user(self, user_id: UUID) -> AuthIdentity | None:
+        """Return the primary local auth identity for a user, if one exists."""
+
+        statement = (
+            select(AuthIdentity)
+            .where(
+                AuthIdentity.user_id == user_id,
+                AuthIdentity.provider == AuthProvider.LOCAL,
+            )
+            .order_by(AuthIdentity.is_primary.desc(), AuthIdentity.created_at.asc())
         )
         return self.db.scalar(statement)

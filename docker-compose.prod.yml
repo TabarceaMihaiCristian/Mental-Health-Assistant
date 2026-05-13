@@ -28,6 +28,8 @@ services:
     environment:
       AUTO_MIGRATE: ${AUTO_MIGRATE:-true}
       SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-true}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5-mini}
     ports:
       - "8000:8000"
     depends_on:

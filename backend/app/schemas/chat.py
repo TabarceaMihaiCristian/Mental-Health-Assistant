@@ -51,6 +51,12 @@ class ChatSessionResponse(BaseModel):
     updated_at: datetime
 
 
+class ChatSessionStatusUpdateResponse(BaseModel):
+    """Response returned after a chat session lifecycle transition."""
+
+    session: ChatSessionResponse
+
+
 class ChatSessionDetailResponse(ChatSessionResponse):
     """Detailed chat session response that includes the message history."""
 

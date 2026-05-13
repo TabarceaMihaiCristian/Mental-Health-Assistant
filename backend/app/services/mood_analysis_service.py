@@ -27,6 +27,25 @@ from app.services.risk_event_service import RiskEventService
 from app.utils.logging import get_app_logger, log_event, mask_uuid
 
 
+CRISIS_MARKERS = (
+    "kill myself",
+    "want to die",
+    "end my life",
+    "suicide",
+    "suicidal",
+    "self harm",
+    "self-harm",
+    "don't want to live",
+)
+
+HIGH_RISK_MARKERS = (
+    "hurt myself",
+    "can't go on",
+    "life is ruined",
+    "no reason to live",
+    "wish i was dead",
+)
+
 RISK_PRIORITY = {
     RiskLevel.LOW: 0,
     RiskLevel.MEDIUM: 1,
@@ -204,6 +223,26 @@ class MoodAnalysisService:
         """Build a low-confidence deterministic fallback analysis."""
 
         message = user_message.lower()
+
+        if any(token in message for token in CRISIS_MARKERS):
+            return MoodAnalysisResult(
+                primary_mood=MoodLabel.SAD,
+                secondary_mood=MoodLabel.OVERWHELMED,
+                intensity=5,
+                confidence=0.35,
+                risk=RiskLevel.CRITICAL,
+                possible_triggers=["self-harm language", "acute crisis"],
+            )
+
+        if any(token in message for token in HIGH_RISK_MARKERS):
+            return MoodAnalysisResult(
+                primary_mood=MoodLabel.SAD,
+                secondary_mood=MoodLabel.OVERWHELMED,
+                intensity=4,
+                confidence=0.3,
+                risk=RiskLevel.HIGH,
+                possible_triggers=["acute distress"],
+            )
 
         positive_tokens = (
             "good",

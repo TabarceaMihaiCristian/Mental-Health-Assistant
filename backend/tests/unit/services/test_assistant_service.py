@@ -62,6 +62,52 @@ def test_generate_reply_returns_model_output(monkeypatch: pytest.MonkeyPatch) ->
 
 
 @pytest.mark.unit
+def test_generate_reply_uses_crisis_fallback_for_self_harm_language(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fallback to an immediate-safety reply when the latest user message contains self-harm intent."""
+
+    client = SimpleNamespace(
+        responses=SimpleNamespace(create=Mock(return_value=SimpleNamespace(output_text="   ")))
+    )
+    prompt_builder = SimpleNamespace(build_messages=Mock(return_value=[]))
+    monkeypatch.setattr("app.services.assistant_service.build_openai_client", Mock(return_value=client))
+    monkeypatch.setattr("app.services.assistant_service.AssistantPromptBuilder", Mock(return_value=prompt_builder))
+    service = AssistantService()
+    session = _session(
+        [
+            ChatMessage(session_id=uuid4(), sender=SenderType.USER, content="I want to kill myself."),
+        ]
+    )
+
+    reply = service.generate_reply(_user(), session)
+
+    assert "call emergency services now" in reply
+
+
+@pytest.mark.unit
+def test_generate_reply_extracts_nested_output_content(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Use nested response content when output_text is empty but the response still contains text."""
+
+    client = SimpleNamespace(
+        responses=SimpleNamespace(
+            create=Mock(
+                return_value=SimpleNamespace(
+                    output_text="",
+                    output=[SimpleNamespace(content=[SimpleNamespace(text=" Nested reply ")])],
+                )
+            )
+        )
+    )
+    prompt_builder = SimpleNamespace(build_messages=Mock(return_value=[]))
+    monkeypatch.setattr("app.services.assistant_service.build_openai_client", Mock(return_value=client))
+    monkeypatch.setattr("app.services.assistant_service.AssistantPromptBuilder", Mock(return_value=prompt_builder))
+    service = AssistantService()
+
+    reply = service.generate_reply(_user(), _session())
+
+    assert reply == "Nested reply"
+
+
+@pytest.mark.unit
 def test_generate_reply_uses_positive_fallback_for_empty_model_output(monkeypatch: pytest.MonkeyPatch) -> None:
     """Fallback to the positive-tone helper when the model returns no usable text."""
 

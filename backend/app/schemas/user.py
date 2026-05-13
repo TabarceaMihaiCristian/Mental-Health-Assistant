@@ -35,6 +35,24 @@ class UserProfileResponse(BaseModel):
     timezone: str
 
 
+class UserProfileUpsertRequest(BaseModel):
+    """Payload used to create or update the current user's profile."""
+
+    full_name: str = Field(min_length=1, max_length=255)
+    age_range: str | None = Field(default=None, max_length=50)
+    occupation: str | None = Field(default=None, max_length=255)
+    goals: str | None = Field(default=None, max_length=5000)
+    preferred_activities: list[str] = Field(default_factory=list, max_length=25)
+    timezone: str = Field(min_length=1, max_length=100)
+
+
+class UserPasswordChangeRequest(BaseModel):
+    """Payload used to change the current user's local password."""
+
+    current_password: str = Field(min_length=8, max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
 class UserResponse(UserBase):
     """Public user representation safe to return from the API."""
 

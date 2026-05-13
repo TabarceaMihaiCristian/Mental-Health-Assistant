@@ -18,14 +18,16 @@ def _next_weekday_datetime(
     target_weekday: int,
     hour: int,
 ) -> datetime:
-    """Return the next future UTC datetime matching a weekday and hour."""
+    """Return the next matching UTC datetime safely beyond the booking notice window."""
 
     now = datetime.now(UTC)
+    minimum_start = now + timedelta(hours=3)
     candidate = now.replace(hour=hour, minute=0, second=0, microsecond=0)
     days_ahead = (target_weekday - candidate.weekday()) % 7
-    if days_ahead == 0 and candidate <= now:
-        days_ahead = 7
-    return candidate + timedelta(days=days_ahead)
+    candidate = candidate + timedelta(days=days_ahead)
+    if candidate <= minimum_start:
+        candidate += timedelta(days=7)
+    return candidate
 
 
 @pytest.mark.integration

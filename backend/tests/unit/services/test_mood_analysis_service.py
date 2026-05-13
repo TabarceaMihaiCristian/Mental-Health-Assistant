@@ -101,6 +101,22 @@ def test_extract_response_text_reads_nested_output_content() -> None:
 
 
 @pytest.mark.unit
+def test_build_heuristic_fallback_result_detects_explicit_self_harm_language() -> None:
+    """Escalate explicit self-harm intent to critical risk in the deterministic fallback."""
+
+    service = object.__new__(MoodAnalysisService)
+
+    result = service._build_heuristic_fallback_result("My life is ruined. I want to kill myself.")
+
+    assert result.primary_mood == MoodLabel.SAD
+    assert result.secondary_mood == MoodLabel.OVERWHELMED
+    assert result.risk == RiskLevel.CRITICAL
+    assert result.intensity == 5
+    assert result.confidence == pytest.approx(0.35)
+    assert "self-harm language" in result.possible_triggers
+
+
+@pytest.mark.unit
 def test_build_heuristic_fallback_result_detects_stress_signals() -> None:
     """Map stress language into the deterministic fallback analysis."""
 

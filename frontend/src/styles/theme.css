@@ -1,0 +1,184 @@
+:root {
+  --font-size: 16px;
+  --teal-50: #f0f9f8;
+  --teal-100: #d4f0ed;
+  --teal-200: #a8e0db;
+  --teal-300: #7dcfc9;
+  --teal-400: #51beb7;
+  --teal-500: #26ada5;
+  --teal-600: #1e8a84;
+  --teal-700: #176863;
+  --teal-800: #0f4542;
+  --teal-900: #082321;
+  --slate-50: #f8f9fa;
+  --slate-100: #f1f3f5;
+  --slate-200: #e9ecef;
+  --slate-300: #dee2e6;
+  --slate-400: #ced4da;
+  --slate-500: #adb5bd;
+  --slate-600: #6c757d;
+  --slate-700: #495057;
+  --slate-800: #343a40;
+  --slate-900: #212529;
+  --sand-50: #fdfcfb;
+  --sand-100: #faf8f5;
+  --sand-200: #f5f1eb;
+  --sand-300: #ebe4d9;
+  --sand-400: #d9cdb9;
+  --sand-500: #c7b699;
+  --sand-600: #a89570;
+  --sand-700: #8a7556;
+  --sand-800: #6b583d;
+  --sand-900: #4d3b24;
+  --sage-50: #f6f8f6;
+  --sage-100: #e8ede8;
+  --sage-200: #d1dbd1;
+  --sage-300: #b9c9b9;
+  --sage-400: #a2b7a2;
+  --sage-500: #8ba58b;
+  --sage-600: #6d846d;
+  --sage-700: #526352;
+  --sage-800: #384238;
+  --sage-900: #1d211d;
+  --red-50: #fef2f2;
+  --red-100: #fde6e6;
+  --red-200: #fbcccc;
+  --red-300: #f8b3b3;
+  --red-400: #f69999;
+  --red-500: #f48080;
+  --red-600: #e65c5c;
+  --red-700: #c93d3d;
+  --red-800: #9e2424;
+  --red-900: #6b0f0f;
+  --amber-50: #fffbf5;
+  --amber-100: #fff5e6;
+  --amber-200: #ffe8cc;
+  --amber-300: #ffdbb3;
+  --amber-400: #ffce99;
+  --amber-500: #ffc180;
+  --amber-600: #f5a142;
+  --amber-700: #e68019;
+  --amber-800: #b35f00;
+  --amber-900: #803f00;
+  --background: #ffffff;
+  --foreground: var(--slate-900);
+  --card: #ffffff;
+  --card-foreground: var(--slate-900);
+  --popover: #ffffff;
+  --popover-foreground: var(--slate-900);
+  --primary: var(--teal-700);
+  --primary-foreground: #ffffff;
+  --primary-hover: var(--teal-800);
+  --primary-light: var(--teal-100);
+  --secondary: var(--slate-100);
+  --secondary-foreground: var(--slate-900);
+  --secondary-hover: var(--slate-200);
+  --muted: var(--sand-100);
+  --muted-foreground: var(--slate-600);
+  --accent: var(--sand-200);
+  --accent-foreground: var(--slate-900);
+  --destructive: var(--red-600);
+  --destructive-foreground: #ffffff;
+  --destructive-hover: var(--red-700);
+  --success: var(--sage-600);
+  --success-foreground: #ffffff;
+  --success-light: var(--sage-100);
+  --warning: var(--amber-600);
+  --warning-foreground: var(--slate-900);
+  --warning-light: var(--amber-100);
+  --info: var(--teal-500);
+  --info-foreground: #ffffff;
+  --info-light: var(--teal-100);
+  --border: var(--slate-300);
+  --input: var(--slate-300);
+  --input-background: var(--slate-50);
+  --ring: var(--teal-600);
+  --radius: 0.75rem;
+  --sidebar: var(--slate-50);
+  --sidebar-foreground: var(--slate-900);
+  --sidebar-accent: var(--sand-100);
+  --sidebar-border: var(--slate-200);
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04);
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(168, 224, 219, 0.26), transparent 24%),
+    radial-gradient(circle at top right, rgba(245, 241, 235, 0.8), transparent 30%),
+    linear-gradient(180deg, var(--sand-50) 0%, #ffffff 45%, #f7faf9 100%);
+  color: var(--foreground);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

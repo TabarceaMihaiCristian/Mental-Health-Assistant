@@ -10,7 +10,7 @@ from app.db.unit_of_work import UnitOfWork
 from app.models.base import utc_now
 from app.models.chat_message import ChatMessage
 from app.models.chat_session import ChatSession
-from app.models.enums import ChatSessionStatus, RiskLevel, SenderType
+from app.models.enums import ChatSessionStatus, ReportPeriod, RiskLevel, SenderType
 from app.models.user import User
 from app.repositories.chat_repository import ChatMessageRepository, ChatSessionRepository
 from app.schemas.assistant import ChatInteractionRequest
@@ -18,6 +18,7 @@ from app.schemas.chat import ChatMessageCreateRequest, ChatSessionCreateRequest
 from app.schemas.suggestion import CriticalAppointmentSuggestionsResponse
 from app.services.assistant_service import AssistantService
 from app.services.mood_analysis_service import run_best_effort_mood_analysis
+from app.services.report_service import ReportService
 from app.services.suggestion_service import SuggestionService
 from app.utils.logging import get_app_logger, log_event, mask_uuid
 from app.utils.validation import ensure_user_sender, normalize_message_content
@@ -52,8 +53,7 @@ class ChatService:
         self.logger = get_app_logger(__name__)
 
     def create_session(self, user: User, payload: ChatSessionCreateRequest) -> ChatSession:
-        """Create and persist a new open chat session for the user."""
-
+        """Create a new open chat session owned by the authenticated user."""
         session = ChatSession(
             user_id=user.id,
             summary=payload.summary,
@@ -71,22 +71,59 @@ class ChatService:
         return session
 
     def get_open_session(self, user: User) -> ChatSession | None:
-        """Return the most recent open session for the user, if one exists."""
-
+        """Return the current open chat session for the authenticated user, if any."""
         return self.session_repository.get_open_session_for_user(user.id)
 
     def list_sessions(self, user: User) -> list[ChatSession]:
         """List all chat sessions belonging to the authenticated user."""
-
         return self.session_repository.list_sessions_for_user(user.id)
 
     def get_session(self, user: User, session_id: UUID) -> ChatSession:
-        """Return a single owned session along with its ordered message history."""
-
+        """Return one owned chat session or raise when the session is not accessible."""
         session = self.session_repository.get_owned_session(user.id, session_id)
         if session is None:
             raise ChatSessionNotFoundError("Chat session not found.")
         return session
+
+    def close_session(self, user: User, session_id: UUID) -> ChatSession:
+        """Mark an owned open chat session as closed and stamp its end time."""
+        session = self.get_session(user, session_id)
+        if session.status != ChatSessionStatus.OPEN:
+            return session
+        session.status = ChatSessionStatus.CLOSED
+        session.ended_at = utc_now()
+        self.session_repository.add(session)
+        self.uow.commit()
+        self.uow.refresh(session)
+        self._sync_reports_after_close(user, session)
+        return session
+
+    def archive_session(self, user: User, session_id: UUID) -> ChatSession:
+        """Archive an owned chat session and preserve its recorded end time."""
+        session = self.get_session(user, session_id)
+        session.status = ChatSessionStatus.ARCHIVED
+        session.ended_at = session.ended_at or utc_now()
+        self.session_repository.add(session)
+        self.uow.commit()
+        self.uow.refresh(session)
+        return session
+
+    def _sync_reports_after_close(self, user: User, session: ChatSession) -> None:
+        """Regenerate current period reports after a conversation is explicitly closed."""
+
+        reference_date = (session.ended_at or session.last_message_at or session.started_at).date()
+        try:
+            report_service = ReportService(self.db)
+            report_service.generate_report(user, ReportPeriod.WEEKLY, reference_date)
+            report_service.generate_report(user, ReportPeriod.MONTHLY, reference_date)
+        except RuntimeError as exc:
+            log_event(
+                self.logger,
+                "chat.session.report_sync_failed",
+                user_id=mask_uuid(user.id),
+                session_id=mask_uuid(session.id),
+                reason=str(exc),
+            )
 
     def add_message(
         self,
@@ -94,8 +131,7 @@ class ChatService:
         session_id: UUID,
         payload: ChatMessageCreateRequest,
     ) -> ChatMessage:
-        """Append a user-authored message to an owned open chat session."""
-
+        """Persist a user-authored message into an open owned chat session."""
         try:
             ensure_user_sender(payload.sender)
         except ValueError as exc:
@@ -137,8 +173,7 @@ class ChatService:
         ChatSession,
         CriticalAppointmentSuggestionsResponse | None,
     ]:
-        """Persist a user message, generate an assistant reply, and persist that reply."""
-
+        """Store a user message, generate an assistant reply, and return both messages."""
         session = self.get_session(user, session_id)
         if session.status != ChatSessionStatus.OPEN:
             raise ChatSessionClosedError("Cannot add messages to a closed chat session.")
@@ -160,6 +195,7 @@ class ChatService:
                 "chat.interaction.assistant_failed",
                 user_id=mask_uuid(user.id),
                 session_id=mask_uuid(session.id),
+                detail=str(exc),
             )
             raise AssistantInteractionError(str(exc)) from exc
 

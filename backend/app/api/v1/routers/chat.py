@@ -18,6 +18,7 @@ from app.schemas.chat import (
     ChatSessionCreateRequest,
     ChatSessionDetailResponse,
     ChatSessionResponse,
+    ChatSessionStatusUpdateResponse,
 )
 from app.services.chat_service import (
     AssistantInteractionError,
@@ -39,8 +40,7 @@ def create_chat_session(
     current_user: CurrentUser,
     db: DbSession,
 ) -> ChatSessionResponse:
-    """Create a new open chat session for the authenticated user."""
-
+    """Create a new chat session for the authenticated user."""
     service = ChatService(db)
     session = service.create_session(current_user, payload)
     return ChatSessionResponse.model_validate(session)
@@ -48,8 +48,7 @@ def create_chat_session(
 
 @router.get("/sessions")
 def list_chat_sessions(current_user: CurrentUser, db: DbSession) -> list[ChatSessionResponse]:
-    """List the authenticated user's chat sessions."""
-
+    """List all chat sessions owned by the authenticated user."""
     service = ChatService(db)
     sessions = service.list_sessions(current_user)
     return [ChatSessionResponse.model_validate(session) for session in sessions]
@@ -57,8 +56,7 @@ def list_chat_sessions(current_user: CurrentUser, db: DbSession) -> list[ChatSes
 
 @router.get("/sessions/open")
 def get_open_chat_session(current_user: CurrentUser, db: DbSession) -> ChatSessionResponse | None:
-    """Return the authenticated user's current open chat session, if any."""
-
+    """Return the current open chat session for the authenticated user, if one exists."""
     service = ChatService(db)
     session = service.get_open_session(current_user)
     if session is None:
@@ -72,8 +70,7 @@ def get_chat_session(
     current_user: CurrentUser,
     db: DbSession,
 ) -> ChatSessionDetailResponse:
-    """Return a specific owned chat session with its full message history."""
-
+    """Return one owned chat session by identifier."""
     service = ChatService(db)
     try:
         session = service.get_session(current_user, session_id)
@@ -81,6 +78,36 @@ def get_chat_session(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
     return ChatSessionDetailResponse.model_validate(session)
+
+
+@router.patch("/sessions/{session_id}/close")
+def close_chat_session(
+    session_id: UUID,
+    current_user: CurrentUser,
+    db: DbSession,
+) -> ChatSessionStatusUpdateResponse:
+    """Close an owned open chat session."""
+    service = ChatService(db)
+    try:
+        session = service.close_session(current_user, session_id)
+    except ChatSessionNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return ChatSessionStatusUpdateResponse(session=ChatSessionResponse.model_validate(session))
+
+
+@router.patch("/sessions/{session_id}/archive")
+def archive_chat_session(
+    session_id: UUID,
+    current_user: CurrentUser,
+    db: DbSession,
+) -> ChatSessionStatusUpdateResponse:
+    """Archive an owned chat session."""
+    service = ChatService(db)
+    try:
+        session = service.archive_session(current_user, session_id)
+    except ChatSessionNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return ChatSessionStatusUpdateResponse(session=ChatSessionResponse.model_validate(session))
 
 
 @router.post(
@@ -93,8 +120,7 @@ def add_chat_message(
     current_user: CurrentUser,
     db: DbSession,
 ) -> ChatMessageResponse:
-    """Append a user message to an owned open chat session."""
-
+    """Persist a direct user message into an open chat session."""
     service = ChatService(db)
     try:
         message = service.add_message(current_user, session_id, payload)
@@ -115,11 +141,15 @@ def create_chat_interaction(
     current_user: CurrentUser,
     db: DbSession,
 ) -> ChatInteractionResponse:
-    """Create a user message, generate an assistant reply, and persist both."""
-
+    """Create a user-assistant interaction inside an open chat session."""
     service = ChatService(db)
     try:
-        user_message, assistant_message, session, appointment_suggestions = service.create_interaction(
+        (
+            user_message,
+            assistant_message,
+            session,
+            appointment_suggestions,
+        ) = service.create_interaction(
             current_user,
             session_id,
             payload,

@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 
 from app.models.chat_session import ChatSession
-from app.models.enums import ChatSessionStatus, RiskLevel, SenderType, UserRole
+from app.models.enums import ChatSessionStatus, ReportPeriod, RiskLevel, SenderType, UserRole
 from app.models.user import User
 from app.schemas.assistant import ChatInteractionRequest
 from app.schemas.chat import ChatMessageCreateRequest, ChatSessionCreateRequest
@@ -76,6 +76,60 @@ def test_get_session_raises_when_owned_session_is_missing() -> None:
 
     with pytest.raises(ChatSessionNotFoundError, match="Chat session not found."):
         service.get_session(user, uuid4())
+
+
+@pytest.mark.unit
+def test_close_session_marks_open_session_closed_and_generates_reports(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Close an open session and regenerate the current weekly and monthly reports."""
+
+    service = object.__new__(ChatService)
+    service.db = Mock()
+    service.uow = Mock()
+    service.session_repository = Mock()
+    service.message_repository = Mock()
+    service.logger = Mock()
+    session = _session(status=ChatSessionStatus.OPEN)
+    user = _user()
+    service.get_session = Mock(return_value=session)
+    report_service = SimpleNamespace(generate_report=Mock())
+    monkeypatch.setattr("app.services.chat_service.ReportService", Mock(return_value=report_service))
+
+    result = service.close_session(user, session.id)
+
+    assert result is session
+    assert session.status == ChatSessionStatus.CLOSED
+    assert session.ended_at is not None
+    service.session_repository.add.assert_called_once_with(session)
+    service.uow.commit.assert_called_once()
+    service.uow.refresh.assert_called_once_with(session)
+    report_service.generate_report.assert_any_call(user, ReportPeriod.WEEKLY, session.ended_at.date())
+    report_service.generate_report.assert_any_call(user, ReportPeriod.MONTHLY, session.ended_at.date())
+    assert report_service.generate_report.call_count == 2
+
+
+@pytest.mark.unit
+def test_close_session_keeps_closure_when_report_sync_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Do not undo session closure when report materialization fails after close."""
+
+    service = object.__new__(ChatService)
+    service.db = Mock()
+    service.uow = Mock()
+    service.session_repository = Mock()
+    service.message_repository = Mock()
+    service.logger = Mock()
+    session = _session(status=ChatSessionStatus.OPEN)
+    user = _user()
+    service.get_session = Mock(return_value=session)
+    report_service = SimpleNamespace(generate_report=Mock(side_effect=RuntimeError("report store unavailable")))
+    monkeypatch.setattr("app.services.chat_service.ReportService", Mock(return_value=report_service))
+
+    result = service.close_session(user, session.id)
+
+    assert result is session
+    assert session.status == ChatSessionStatus.CLOSED
+    assert session.ended_at is not None
+    service.uow.commit.assert_called_once()
+    service.uow.refresh.assert_called_once_with(session)
 
 
 @pytest.mark.unit

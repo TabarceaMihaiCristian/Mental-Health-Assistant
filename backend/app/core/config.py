@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     secret_key: str = Field(..., alias="SECRET_KEY")
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    password_reset_token_expire_minutes: int = 30
 
     backend_cors_origins: list[str] = Field(default_factory=list)
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
@@ -50,6 +51,21 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def normalize_debug_value(cls, value: object) -> object:
+        """Treat leaked logging-level env vars as disabled debug mode."""
+
+        if not isinstance(value, str):
+            return value
+
+        normalized = value.strip().lower()
+        if normalized in {"warn", "warning", "info", "error", "critical"}:
+            return False
+        if normalized == "debug":
+            return True
+        return value
 
 
 @lru_cache
