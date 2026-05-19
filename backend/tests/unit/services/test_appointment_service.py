@@ -267,6 +267,54 @@ def test_create_appointment_record_persists_confirmed_appointment(monkeypatch: p
 
 
 @pytest.mark.unit
+def test_notify_specialist_uses_safe_notification_delivery() -> None:
+    service = object.__new__(AppointmentService)
+    service.specialist_repository = Mock()
+    service._create_notification_safely = Mock()
+    appointment = _build_appointment(
+        status=AppointmentStatus.REQUESTED,
+        preferred_datetime=datetime.now(UTC) + timedelta(days=2),
+    )
+    specialist_user_id = uuid4()
+    service.specialist_repository.get_by_id.return_value = SimpleNamespace(user_id=specialist_user_id)
+
+    service._notify_specialist(
+        appointment,
+        NotificationType.APPOINTMENT_REQUESTED,
+        "Title",
+        "Message",
+    )
+
+    service._create_notification_safely.assert_called_once_with(
+        user_id=specialist_user_id,
+        notification_type=NotificationType.APPOINTMENT_REQUESTED,
+        title="Title",
+        message="Message",
+        appointment_id=appointment.id,
+    )
+
+
+@pytest.mark.unit
+def test_create_notification_safely_rolls_back_and_suppresses_failures() -> None:
+    service = object.__new__(AppointmentService)
+    service.notification_service = Mock()
+    service.notification_service.create_notification.side_effect = RuntimeError("blocked")
+    service.uow = Mock()
+    service.logger = Mock()
+
+    service._create_notification_safely(
+        user_id=uuid4(),
+        notification_type=NotificationType.APPOINTMENT_REQUESTED,
+        title="Title",
+        message="Message",
+        appointment_id=uuid4(),
+    )
+
+    service.uow.rollback.assert_called_once()
+    service.logger.exception.assert_called_once()
+
+
+@pytest.mark.unit
 def test_notify_specialist_skips_missing_profile_or_user() -> None:
     service = object.__new__(AppointmentService)
     service.specialist_repository = Mock()
@@ -289,6 +337,8 @@ def test_build_notification_message_uses_utc_timestamp() -> None:
     message = service._build_notification_message("Appointment updated", appointment)
 
     assert message == "Appointment updated. Scheduled for 2026-04-25 09:00 UTC."
+
+
 
 
 

@@ -577,11 +577,11 @@ class AppointmentService:
         specialist = self.specialist_repository.get_by_id(appointment.specialist_id)
         if specialist is None or specialist.user_id is None:
             return
-        self.notification_service.create_notification(
-            specialist.user_id,
-            notification_type,
-            title,
-            message,
+        self._create_notification_safely(
+            user_id=specialist.user_id,
+            notification_type=notification_type,
+            title=title,
+            message=message,
             appointment_id=appointment.id,
         )
 
@@ -594,13 +594,41 @@ class AppointmentService:
     ) -> None:
         """Notify a platform user about an appointment transition."""
 
-        self.notification_service.create_notification(
-            appointment.user_id,
-            notification_type,
-            title,
-            message,
+        self._create_notification_safely(
+            user_id=appointment.user_id,
+            notification_type=notification_type,
+            title=title,
+            message=message,
             appointment_id=appointment.id,
         )
+
+    def _create_notification_safely(
+        self,
+        *,
+        user_id: UUID,
+        notification_type: NotificationType,
+        title: str,
+        message: str,
+        appointment_id: UUID,
+    ) -> None:
+        """Persist a notification side effect without aborting the main workflow."""
+
+        try:
+            self.notification_service.create_notification(
+                user_id,
+                notification_type,
+                title,
+                message,
+                appointment_id=appointment_id,
+            )
+        except Exception:  # pragma: no cover - exact DB failure shape is environment-specific.
+            self.uow.rollback()
+            self.logger.exception(
+                "notifications.delivery_failed | user_id=%s appointment_id=%s type=%s",
+                user_id,
+                appointment_id,
+                notification_type.value,
+            )
 
     def _notify_both_sides_rescheduled(
         self,
@@ -737,3 +765,4 @@ class AppointmentService:
 
         timestamp = appointment.preferred_datetime.astimezone(UTC).strftime("%Y-%m-%d %H:%M UTC")
         return f"{prefix}. Scheduled for {timestamp}."
+
