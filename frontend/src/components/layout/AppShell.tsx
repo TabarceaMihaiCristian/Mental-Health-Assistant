@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
-import { Bell, Calendar, FileText, LayoutDashboard, LogOut, MessageSquare, Settings, Shield, Users } from "lucide-react";
+import { Bell, Calendar, FileText, LayoutDashboard, LogOut, MessageSquare, Settings, Shield, ShieldCheck, UserCog, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../app/use-auth";
 import { cn } from "../../lib/cn";
@@ -27,20 +27,42 @@ const specialistItems: NavItem[] = [
   { label: "Appointments", to: "/specialist/appointments", icon: Calendar },
   { label: "Schedule", to: "/specialist/schedule", icon: MessageSquare },
   { label: "Notifications", to: "/notifications", icon: Bell },
-  { label: "System", to: "/design-system", icon: Shield },
+  { label: "Settings", to: "/settings", icon: Settings },
 ];
 
-export function AppShell({ title, subtitle, children, role = "user", actions }: { title: string; subtitle?: string; children: ReactNode; role?: "user" | "specialist"; actions?: ReactNode }) {
+const adminItems: NavItem[] = [
+  { label: "Dashboard", to: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Specialists", to: "/admin/specialists", icon: UserCog },
+  { label: "Appointments", to: "/admin/appointments", icon: Calendar },
+  { label: "Notifications", to: "/notifications", icon: Bell },
+  { label: "Settings", to: "/settings", icon: Settings },
+];
+
+type ShellRole = "user" | "specialist" | "admin";
+
+function normalizeRole(role: string | null | undefined): ShellRole {
+  if (role === "specialist" || role === "admin") {
+    return role;
+  }
+
+  return "user";
+}
+
+export function AppShell({ title, subtitle, children, role, actions }: { title: string; subtitle?: string; children: ReactNode; role?: ShellRole; actions?: ReactNode }) {
   const { user, logout } = useAuth();
-  const navItems = role === "specialist" ? specialistItems : userItems;
-  const displayName = role === "specialist" ? "Specialist Workspace" : user?.full_name ?? "User";
+  const effectiveRole = role ?? normalizeRole(user?.role);
+  const navItems = effectiveRole === "specialist" ? specialistItems : effectiveRole === "admin" ? adminItems : userItems;
+  const displayName = effectiveRole === "specialist" ? "Specialist Workspace" : effectiveRole === "admin" ? "Admin Workspace" : user?.full_name ?? "User";
+  const roleLabel = effectiveRole === "specialist" ? "Practice workspace" : effectiveRole === "admin" ? "Admin workspace" : "Authenticated workspace";
+  const emailLabel = effectiveRole === "specialist" ? "Specialist view" : user?.email;
+  const brandIcon = effectiveRole === "admin" ? <ShieldCheck className="size-6" /> : <Shield className="size-6" />;
 
   return (
     <div className="flex min-h-screen bg-transparent">
       <aside className="hidden w-72 shrink-0 border-r border-[--sidebar-border] bg-[color:rgba(248,249,250,0.88)] px-5 py-6 lg:flex lg:flex-col">
         <div className="mb-8 flex items-center gap-3 px-2">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[--primary-light] text-[--primary]">
-            <Shield className="size-6" />
+            {brandIcon}
           </div>
           <div>
             <p className="text-sm uppercase tracking-[0.18em] text-[--muted-foreground]">Mental Health</p>
@@ -69,7 +91,7 @@ export function AppShell({ title, subtitle, children, role = "user", actions }: 
             <Avatar name={displayName} />
             <div>
               <p className="font-semibold tracking-[-0.02em]">{displayName}</p>
-              <p className="text-sm text-[--muted-foreground]">{role === "specialist" ? "Specialist view" : user?.email}</p>
+              <p className="text-sm text-[--muted-foreground]">{emailLabel}</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" className="mt-4 w-full justify-start rounded-2xl" onClick={logout}>
@@ -83,7 +105,7 @@ export function AppShell({ title, subtitle, children, role = "user", actions }: 
         <header className="border-b border-[--border] bg-[color:rgba(255,255,255,0.82)] px-6 py-5 backdrop-blur-md">
           <div className="mx-auto flex w-full max-w-7xl items-start justify-between gap-6">
             <div>
-              <p className="text-sm uppercase tracking-[0.18em] text-[--muted-foreground]">{role === "specialist" ? "Practice workspace" : "Authenticated workspace"}</p>
+              <p className="text-sm uppercase tracking-[0.18em] text-[--muted-foreground]">{roleLabel}</p>
               <h1 className="mt-2 text-4xl font-semibold tracking-[-0.04em] text-[--foreground]">{title}</h1>
               {subtitle ? <p className="mt-3 max-w-3xl text-[--muted-foreground]">{subtitle}</p> : null}
             </div>
@@ -97,5 +119,3 @@ export function AppShell({ title, subtitle, children, role = "user", actions }: 
     </div>
   );
 }
-
-

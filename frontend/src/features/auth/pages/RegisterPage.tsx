@@ -5,6 +5,8 @@ import { AuthShell } from "../../../components/layout/AuthShell";
 import { Button } from "../../../components/ui/Button";
 import { SelectField, TextField } from "../../../components/ui/Fields";
 import { ApiError } from "../../../lib/api";
+import { readStoredAuth } from "../../../lib/auth-storage";
+import { getHomePathForRole } from "../../../lib/role-home";
 
 export function RegisterPage() {
   const { registerWithPassword } = useAuth();
@@ -33,7 +35,8 @@ export function RegisterPage() {
     setIsSubmitting(true);
     try {
       await registerWithPassword({ full_name: fullName.trim(), email, password });
-      navigate("/app", { replace: true });
+      const nextRole = readStoredAuth()?.user?.role;
+      navigate(getHomePathForRole(nextRole), { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Unable to create the account right now.");
     } finally {
@@ -48,8 +51,8 @@ export function RegisterPage() {
         <TextField label="Full name" type="text" autoComplete="name" placeholder="Jane Doe" value={fullName} onChange={(event) => setFullName(event.target.value)} required />
         <TextField label="Email" type="email" autoComplete="email" placeholder="email@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
         <div className="grid gap-5 md:grid-cols-2">
-          <TextField label="Password" type="password" autoComplete="new-password" placeholder="••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required />
-          <TextField label="Confirm password" type="password" autoComplete="new-password" placeholder="••••••••" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required />
+          <TextField label="Password" type="password" autoComplete="new-password" placeholder="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <TextField label="Confirm password" type="password" autoComplete="new-password" placeholder="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required />
         </div>
         <SelectField label="I am a..." value={role} onChange={(event) => setRole(event.target.value)}>
           <option value="user">Individual seeking support</option>
@@ -67,5 +70,3 @@ export function RegisterPage() {
     </AuthShell>
   );
 }
-
-

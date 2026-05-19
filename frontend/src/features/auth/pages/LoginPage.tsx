@@ -6,12 +6,14 @@ import { AuthShell } from "../../../components/layout/AuthShell";
 import { Button } from "../../../components/ui/Button";
 import { TextField } from "../../../components/ui/Fields";
 import { ApiError } from "../../../lib/api";
+import { readStoredAuth } from "../../../lib/auth-storage";
+import { getHomePathForRole } from "../../../lib/role-home";
 
 export function LoginPage() {
   const { loginWithPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = (location.state as { from?: { pathname?: string } } | undefined)?.from?.pathname ?? "/app";
+  const redirectTo = (location.state as { from?: { pathname?: string } } | undefined)?.from?.pathname;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
@@ -25,7 +27,8 @@ export function LoginPage() {
 
     try {
       await loginWithPassword({ email, password });
-      navigate(redirectTo, { replace: true });
+      const nextRole = readStoredAuth()?.user?.role;
+      navigate(redirectTo ?? getHomePathForRole(nextRole), { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Unable to sign in right now.");
     } finally {
@@ -44,7 +47,7 @@ export function LoginPage() {
 
       <form className="grid gap-5" onSubmit={handleSubmit}>
         <TextField label="Email" type="email" autoComplete="email" placeholder="email@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
-        <TextField label="Password" type="password" autoComplete="current-password" placeholder="••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required />
+        <TextField label="Password" type="password" autoComplete="current-password" placeholder="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
 
         <div className="flex items-center justify-between gap-4 text-sm text-[--muted-foreground]">
           <label className="flex items-center gap-2">
@@ -60,10 +63,8 @@ export function LoginPage() {
       </form>
 
       <p className="mt-6 text-center text-sm text-[--muted-foreground]">
-        Don&apos;t have an account? <Link to="/register" className="font-medium text-[--primary] hover:underline">Create one</Link>
+        Don't have an account? <Link to="/register" className="font-medium text-[--primary] hover:underline">Create one</Link>
       </p>
     </AuthShell>
   );
 }
-
-

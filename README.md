@@ -48,6 +48,32 @@ For a production-style environment template:
 Copy-Item .env.production.example .env
 ```
 
+## Demo Seed Data
+
+Run the deterministic local/demo seed from the backend directory:
+
+```powershell
+cd backend
+python -m app.scripts.seed_demo_data
+```
+
+This seed is idempotent for the seeded emails and creates:
+
+- `AdminTest`, `SpecialistTest`, and `UserTest` login accounts
+- 5 realistic specialist directory entries plus 1 inactive specialist
+- recurring weekly availability, a recurring break, and targeted time off
+- stable review/rating data for the public specialists
+- sample appointments so user and specialist dashboards are populated immediately
+
+Default login credentials come from `backend/.env.example` and can be overridden with:
+
+- `SEED_ADMIN_EMAIL`
+- `SEED_ADMIN_PASSWORD`
+- `SEED_SPECIALIST_EMAIL`
+- `SEED_SPECIALIST_PASSWORD`
+- `SEED_USER_EMAIL`
+- `SEED_USER_PASSWORD`
+
 ## CI
 
 The backend CI workflow runs three gates:

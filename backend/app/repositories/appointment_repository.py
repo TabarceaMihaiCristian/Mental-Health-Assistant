@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime, time, timedelta, UTC
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import String, cast, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.appointment import Appointment
@@ -274,7 +274,7 @@ class AppointmentRepository:
 
         statement = select(Appointment)
         if status is not None:
-            statement = statement.where(Appointment.status == status)
+            statement = statement.where(cast(Appointment.status, String) == status.value)
         if specialist_id is not None:
             statement = statement.where(Appointment.specialist_id == specialist_id)
         if user_id is not None:
