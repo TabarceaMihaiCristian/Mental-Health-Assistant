@@ -16,18 +16,6 @@ type ChatSessionListItem = {
   status: string;
 };
 
-async function getOpenSessionId(request: APIRequestContext, token: string) {
-  const response = await request.get(`${apiBaseUrl}/chat/sessions/open`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  expect(response.ok()).toBeTruthy();
-  const payload = (await response.json()) as { id: string } | null;
-  return payload?.id ?? null;
-}
-
 async function listSessions(request: APIRequestContext, token: string) {
   const response = await request.get(`${apiBaseUrl}/chat/sessions`, {
     headers: {
