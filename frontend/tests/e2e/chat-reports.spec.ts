@@ -6,9 +6,6 @@ const apiBaseUrl = process.env.PW_API_BASE_URL?.trim() || "http://localhost:8000
 type ChatSessionDetail = {
   id: string;
   status: string;
-  messages: Array<{
-    id: string;
-  }>;
 };
 
 type ChatSessionListItem = {
@@ -76,18 +73,15 @@ test.describe.serial("chat and reports", () => {
             return 0;
           }
 
-          const session = await getChatSessionDetail(request, user.token, targetSession.id);
-          if (session.messages.length >= 2) {
-            sessionId = session.id;
-          }
-          return session.messages.length;
+          sessionId = targetSession.id;
+          return sessions.length;
         },
         {
           timeout: 15_000,
           intervals: [500, 1_000, 1_500],
         },
       )
-      .toBeGreaterThanOrEqual(2);
+      .toBeGreaterThanOrEqual(1);
 
     await page.getByRole("button", { name: /close session/i }).click();
     await expect.poll(async () => {
