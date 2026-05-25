@@ -1,5 +1,7 @@
 /// <reference types="node" />
 
+import { spawnSync } from "node:child_process";
+import path from "node:path";
 import { expect, type APIRequestContext, type Page } from "@playwright/test";
 
 function fromEnv(name: string, fallbackParts: readonly string[]) {
@@ -37,20 +39,65 @@ type AdminSpecialistRecord = {
   full_name: string;
 };
 
+type LoginAccount = {
+  email: string;
+  password: string;
+  homePath: string;
+  heading: RegExp;
+};
+
+type AuthPayload = {
+  access_token: string;
+  user: {
+    id: string;
+    full_name: string;
+    email: string;
+  };
+};
+
+export type ProvisionedUserAccount = LoginAccount & {
+  userId: string;
+  fullName: string;
+  token: string;
+};
+
+export type ProvisionedSpecialistAccount = LoginAccount & {
+  specialistId: string;
+  fullName: string;
+  token: string;
+};
+
+const repoRoot = path.resolve(import.meta.dirname, "..", "..", "..");
+const backendRoot = path.join(repoRoot, "backend");
+
 function escapeForRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
-export async function loginAs(page: Page, role: Role) {
-  const account = accounts[role];
+export async function loginWith(page: Page, options: {
+  email: string;
+  password: string;
+  homePath: string;
+  heading: RegExp;
+}) {
   await page.goto("/login");
-  await page.getByLabel("Email").fill(account.email);
-  await page.getByLabel("Password").fill(account.secret);
+  await page.getByLabel("Email").fill(options.email);
+  await page.getByLabel("Password").fill(options.password);
   await page.getByRole("button", { name: /sign in/i }).click();
   await expect(page).not.toHaveURL(/\/login$/);
-  await expect(page).toHaveURL(new RegExp(`${escapeForRegExp(account.homePath)}$`));
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(account.heading);
+  await expect(page).toHaveURL(new RegExp(`${escapeForRegExp(options.homePath)}$`));
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(options.heading);
   await expect(page.getByRole("button", { name: /logout/i })).toBeVisible();
+}
+
+export async function loginAs(page: Page, role: Role) {
+  const account = accounts[role];
+  await loginWith(page, {
+    email: account.email,
+    password: account.secret,
+    homePath: account.homePath,
+    heading: account.heading,
+  });
 }
 
 export async function logout(page: Page) {
@@ -58,21 +105,244 @@ export async function logout(page: Page) {
   await expect(page).toHaveURL(/\/login$/);
 }
 
-async function loginViaApi(request: APIRequestContext, role: Role) {
+export async function loginViaApi(request: APIRequestContext, role: Role) {
   const account = accounts[role];
-  const response = await request.post(`${apiBaseUrl}/auth/login`, {
+  return loginViaApiWithCredentials(request, {
+    email: account.email,
+    password: account.secret,
+  });
+}
+
+export async function loginViaApiWithCredentials(
+  request: APIRequestContext,
+  credentials: {
+    email: string;
+    password: string;
+  },
+) {
+  let lastError: unknown = null;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await request.post(`${apiBaseUrl}/auth/login`, {
+        data: {
+          email: credentials.email,
+          password: credentials.password,
+        },
+      });
+
+      if (!response.ok()) {
+        throw new Error(
+          `Playwright API login failed for ${credentials.email}: ${response.status()} ${response.statusText()}`,
+        );
+      }
+
+      const payload = (await response.json()) as { access_token: string };
+      return payload.access_token;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Playwright API login failed unexpectedly.");
+}
+
+function buildUniqueValue(prefix: string) {
+  const random = Math.random().toString(36).slice(2, 8);
+  return `${prefix}-${Date.now()}-${random}`;
+}
+
+export async function registerTestUser(
+  request: APIRequestContext,
+  prefix = "playwright-user",
+): Promise<ProvisionedUserAccount> {
+  const uniqueValue = buildUniqueValue(prefix);
+  const fullName = `Playwright ${uniqueValue}`;
+  const email = `${uniqueValue}@mentalhealthapp.com`;
+  const password = fromEnv("PW_TEST_USER_SECRET", ["Playwright", "User123!"]);
+
+  const response = await request.post(`${apiBaseUrl}/auth/register`, {
     data: {
-      email: account.email,
-      password: account.secret,
+      email,
+      full_name: fullName,
+      password,
     },
   });
 
   if (!response.ok()) {
-    throw new Error(`Playwright API login failed for ${role}: ${response.status()} ${response.statusText()}`);
+    throw new Error(`Playwright user registration failed: ${response.status()} ${await response.text()}`);
   }
 
-  const payload = (await response.json()) as { access_token: string };
-  return payload.access_token;
+  const payload = (await response.json()) as AuthPayload;
+  return {
+    email,
+    password,
+    homePath: "/app",
+    heading: new RegExp(fullName, "i"),
+    userId: payload.user.id,
+    fullName,
+    token: payload.access_token,
+  };
+}
+
+export async function createTestSpecialist(
+  request: APIRequestContext,
+  prefix = "playwright-specialist",
+): Promise<ProvisionedSpecialistAccount> {
+  const adminToken = await loginViaApi(request, "admin");
+  const uniqueValue = buildUniqueValue(prefix);
+  const fullName = `Dr. ${uniqueValue}`;
+  const email = `${uniqueValue}@mentalhealthapp.com`;
+  const password = fromEnv("PW_TEST_SPECIALIST_SECRET", ["Playwright", "Specialist123!"]);
+
+  const response = await request.post(`${apiBaseUrl}/admin/specialists`, {
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+    },
+    data: {
+      email,
+      full_name: fullName,
+      password,
+      specialty: "Stress Management",
+      bio: "Playwright-owned specialist profile for E2E isolation.",
+      consultation_modes: ["online"],
+      city: "Bucharest",
+    },
+  });
+
+  if (!response.ok()) {
+    throw new Error(`Playwright specialist creation failed: ${response.status()} ${await response.text()}`);
+  }
+
+  const payload = (await response.json()) as AdminSpecialistRecord;
+  const token = await loginViaApiWithCredentials(request, { email, password });
+  await replaceSpecialistAvailability(request, token, [0, 1, 2, 3, 4]);
+
+  return {
+    email,
+    password,
+    homePath: "/specialist/dashboard",
+    heading: /specialist dashboard/i,
+    specialistId: payload.id,
+    fullName,
+    token,
+  };
+}
+
+export async function replaceSpecialistAvailability(
+  request: APIRequestContext,
+  specialistToken: string,
+  weekdays: number[],
+) {
+  const response = await request.put(`${apiBaseUrl}/specialists/me/availability`, {
+    headers: {
+      Authorization: `Bearer ${specialistToken}`,
+    },
+    data: weekdays.map((weekday) => ({
+      weekday,
+      start_time: "09:00:00",
+      end_time: "17:00:00",
+      is_enabled: true,
+    })),
+  });
+
+  if (!response.ok()) {
+    throw new Error(`Replacing specialist availability failed: ${response.status()} ${await response.text()}`);
+  }
+}
+
+export async function provisionBookingActors(request: APIRequestContext, prefix: string) {
+  const [user, specialist] = await Promise.all([
+    registerTestUser(request, `${prefix}-user`),
+    createTestSpecialist(request, `${prefix}-specialist`),
+  ]);
+
+  return { user, specialist };
+}
+
+async function waitForBackendHealth(url: string, attempts = 20, delayMs = 500) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        return;
+      }
+    } catch {
+      // keep retrying until the backend is reachable again after reseed
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+
+  throw new Error(`Backend health check failed after reseed at ${url}.`);
+}
+
+function runBackendScript(moduleName: string, args: string[]) {
+  const dockerScript = spawnSync("docker", ["compose", "exec", "-T", "backend", "python", "-m", moduleName, ...args], {
+    cwd: repoRoot,
+    encoding: "utf-8",
+  });
+
+  const windowsPython = path.join(backendRoot, ".venv", "Scripts", "python.exe");
+  const unixPython = path.join(backendRoot, ".venv", "bin", "python");
+  const pythonExecutable = process.platform === "win32" ? windowsPython : unixPython;
+  const fallbackExecutable = process.platform === "win32" ? "python" : "python3";
+  const executable = process.env.PW_BACKEND_PYTHON?.trim() || pythonExecutable;
+
+  const localScript = spawnSync(executable, ["-m", moduleName, ...args], {
+    cwd: backendRoot,
+    encoding: "utf-8",
+  });
+
+  if (dockerScript.status === 0) {
+    return dockerScript.stdout?.trim() ?? "";
+  }
+
+  if (localScript.error && executable !== fallbackExecutable) {
+    const retried = spawnSync(fallbackExecutable, ["-m", moduleName, ...args], {
+      cwd: backendRoot,
+      encoding: "utf-8",
+    });
+
+    if (retried.status === 0) {
+      return retried.stdout?.trim() ?? "";
+    }
+
+    const stderr = retried.stderr?.trim() || retried.stdout?.trim() || retried.error?.message || "Unknown backend script failure.";
+    throw new Error(`Playwright backend helper failed via ${fallbackExecutable}: ${stderr}`);
+  }
+
+  if (localScript.status !== 0) {
+    const stderr = localScript.stderr?.trim() || localScript.stdout?.trim() || localScript.error?.message || "Unknown backend script failure.";
+    const dockerError = dockerScript.stderr?.trim() || dockerScript.stdout?.trim() || dockerScript.error?.message || "Docker backend helper was unavailable.";
+    throw new Error(`Playwright backend helper failed via docker and local python. Docker: ${dockerError} Local (${executable}): ${stderr}`);
+  }
+
+  return localScript.stdout?.trim() ?? "";
+}
+
+export async function reseedDemoData() {
+  runBackendScript("app.scripts.seed_demo_data", []);
+
+  await waitForBackendHealth("http://localhost:8000/api/v1/health");
+}
+
+export async function createPastConfirmedAppointmentForActors(
+  userEmail: string,
+  specialistEmail: string,
+  notes: string,
+) {
+  return runBackendScript("app.scripts.create_test_past_confirmed_appointment", [
+    "--user-email",
+    userEmail,
+    "--specialist-email",
+    specialistEmail,
+    "--notes",
+    notes,
+  ]);
 }
 
 export async function getSeededSpecialistProfile(request: APIRequestContext) {
@@ -96,37 +366,30 @@ export async function getSeededSpecialistProfile(request: APIRequestContext) {
   return specialist;
 }
 
-export async function openSpecialistProfile(page: Page, request: APIRequestContext) {
-  const specialist = await getSeededSpecialistProfile(request);
-
-  await page.goto(`/specialists/${specialist.id}`);
-  await expect(page).toHaveURL(new RegExp(`/specialists/${escapeForRegExp(specialist.id)}$`));
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(specialist.full_name);
+export async function openSpecialistProfileById(
+  page: Page,
+  specialist: {
+    specialistId: string;
+    fullName: string;
+  },
+) {
+  await page.goto(`/specialists/${specialist.specialistId}`);
+  await expect(page).toHaveURL(new RegExp(`/specialists/${escapeForRegExp(specialist.specialistId)}$`));
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(specialist.fullName);
   return specialist;
 }
 
-export async function chooseFirstAvailableSlot(page: Page) {
-  await expect.poll(async () => {
-    return await page.getByLabel("Choose slot").locator("option").evaluateAll((elements) =>
-      elements.filter((element) => (element as HTMLOptionElement).value).length,
-    );
-  }).toBeGreaterThan(0);
-
-  const minimumFutureOffsetMs = 4 * 60 * 60 * 1000;
-  const now = Date.now();
-  const options = await page.getByLabel("Choose slot").locator("option").evaluateAll((elements) =>
-    elements
-      .map((element) => ({
-        value: (element as HTMLOptionElement).value,
-        label: element.textContent?.trim() ?? "",
-      }))
-      .filter((item) => item.value),
-  );
-
-  const futureOption = options.find((option) => {
-    const parsed = Date.parse(option.value);
-    return Number.isFinite(parsed) && parsed > now + minimumFutureOffsetMs;
+export async function openSpecialistProfile(page: Page, request: APIRequestContext) {
+  const specialist = await getSeededSpecialistProfile(request);
+  return openSpecialistProfileById(page, {
+    specialistId: specialist.id,
+    fullName: specialist.full_name,
   });
+}
+
+export async function chooseFirstAvailableSlot(page: Page) {
+  const options = await listAvailableSlots(page);
+  const futureOption = findFutureSlot(options, 4 * 60 * 60 * 1000);
 
   if (!futureOption) {
     throw new Error("No future appointment slots were available for Playwright booking.");
@@ -134,5 +397,41 @@ export async function chooseFirstAvailableSlot(page: Page) {
 
   await page.getByLabel("Choose slot").selectOption(futureOption.value);
   return futureOption;
+}
+
+export async function listAvailableSlots(page: Page) {
+  await expect.poll(async () => {
+    return await page.getByLabel("Choose slot").locator("option").evaluateAll((elements) =>
+      elements.filter((element) => (element as HTMLOptionElement).value).length,
+    );
+  }).toBeGreaterThan(0);
+
+  return page.getByLabel("Choose slot").locator("option").evaluateAll((elements) =>
+    elements
+      .map((element) => ({
+        value: (element as HTMLOptionElement).value,
+        label: element.textContent?.trim() ?? "",
+      }))
+      .filter((item) => item.value),
+  );
+}
+
+function findFutureSlot(options: Array<{ value: string; label: string }>, minimumFutureOffsetMs: number) {
+  const now = Date.now();
+  return options.find((option) => {
+    const parsed = Date.parse(option.value);
+    return Number.isFinite(parsed) && parsed > now + minimumFutureOffsetMs;
+  });
+}
+
+export function filterFutureSlots(
+  options: Array<{ value: string; label: string }>,
+  minimumFutureOffsetMs = 4 * 60 * 60 * 1000,
+) {
+  const now = Date.now();
+  return options.filter((option) => {
+    const parsed = Date.parse(option.value);
+    return Number.isFinite(parsed) && parsed > now + minimumFutureOffsetMs;
+  });
 }
 

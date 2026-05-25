@@ -229,13 +229,21 @@ SPECIALIST_REVIEWS: dict[str, tuple[ReviewSpec, ...]] = {
     ),
 }
 
+LEGACY_DEMO_ACCOUNT_EMAILS = {
+    "admin.test@mentalhealth.local",
+    "specialist.test@mentalhealth.local",
+    "user.test@mentalhealth.local",
+}
+
 
 def main() -> None:
     """Seed deterministic demo accounts, specialists, schedules, and dashboard data."""
 
     with SessionLocal() as session:
         now = datetime.now(UTC)
+        purge_legacy_demo_records(session)
         accounts = ensure_demo_accounts(session)
+        purge_orphaned_seed_specialists(session)
         reviewers = ensure_reviewer_accounts(session)
         specialists = ensure_specialists(session, accounts, now)
         seed_user_profile(session, accounts["UserTest"])
@@ -262,6 +270,61 @@ def ensure_demo_accounts(session: Session) -> dict[str, User]:
         ensure_local_identity(session, user=user, email=email, password=password)
         accounts[spec.label] = user
     return accounts
+
+
+def purge_legacy_demo_records(session: Session) -> None:
+    """Remove deterministic legacy demo accounts and their linked specialist rows."""
+
+    legacy_users = list(session.scalars(select(User).where(User.email.in_(LEGACY_DEMO_ACCOUNT_EMAILS))))
+    if not legacy_users:
+        return
+
+    legacy_user_ids = [user.id for user in legacy_users]
+    legacy_specialists = list(
+        session.scalars(select(Specialist).where(Specialist.user_id.in_(legacy_user_ids)))
+    )
+    legacy_specialist_ids = [specialist.id for specialist in legacy_specialists]
+
+    if legacy_specialist_ids:
+        session.execute(
+            delete(Appointment).where(Appointment.specialist_id.in_(legacy_specialist_ids))
+        )
+        session.execute(
+            delete(SpecialistAvailabilityRule).where(
+                SpecialistAvailabilityRule.specialist_id.in_(legacy_specialist_ids)
+            )
+        )
+        session.execute(
+            delete(SpecialistBreak).where(SpecialistBreak.specialist_id.in_(legacy_specialist_ids))
+        )
+        session.execute(
+            delete(SpecialistTimeOff).where(
+                SpecialistTimeOff.specialist_id.in_(legacy_specialist_ids)
+            )
+        )
+        session.execute(
+            delete(SpecialistReview).where(
+                SpecialistReview.specialist_id.in_(legacy_specialist_ids)
+            )
+        )
+        session.execute(delete(Specialist).where(Specialist.id.in_(legacy_specialist_ids)))
+
+    session.execute(delete(Appointment).where(Appointment.user_id.in_(legacy_user_ids)))
+    session.execute(delete(User).where(User.id.in_(legacy_user_ids)))
+    session.flush()
+
+
+def purge_orphaned_seed_specialists(session: Session) -> None:
+    """Remove orphaned seeded specialist rows left behind by older local demo accounts."""
+
+    seeded_names = [spec.full_name for spec in SPECIALIST_SPECS]
+    session.execute(
+        delete(Specialist).where(
+            Specialist.user_id.is_(None),
+            Specialist.full_name.in_(seeded_names),
+        )
+    )
+    session.flush()
 
 
 def ensure_reviewer_accounts(session: Session) -> dict[str, User]:
@@ -435,6 +498,7 @@ def seed_demo_appointments(
     requested_start = next_weekday_at(now, weekday=next_business_weekday(now, min_days=1), hour=9)
     confirmed_start = next_weekday_at(now, weekday=next_business_weekday(now, min_days=2), hour=15)
     completed_start = previous_weekday_at(now, weekday=previous_business_weekday(now, min_days=2), hour=9)
+    completable_start = previous_weekday_at(now, weekday=previous_business_weekday(now, min_days=1), hour=11)
 
     requested = Appointment(
         user_id=user_test.id,
@@ -469,13 +533,25 @@ def seed_demo_appointments(
         completed_at=completed_start + SLOT_DURATION + timedelta(minutes=15),
         status_updated_by_user_id=elena.user_id,
     )
+    completable = Appointment(
+        user_id=user_test.id,
+        specialist_id=specialist_test.id,
+        mode=AppointmentMode.ONLINE,
+        status=AppointmentStatus.CONFIRMED,
+        preferred_datetime=completable_start,
+        end_datetime=completable_start + SLOT_DURATION,
+        notes="Past confirmed session waiting for specialist completion.",
+        confirmed_at=completable_start - timedelta(days=1),
+        status_updated_by_user_id=specialist_test.user_id,
+    )
 
-    session.add_all([requested, confirmed, completed])
+    session.add_all([requested, confirmed, completed, completable])
     session.flush()
     return {
         "requested": requested,
         "confirmed": confirmed,
         "completed": completed,
+        "completable": completable,
     }
 
 

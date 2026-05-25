@@ -1,19 +1,20 @@
 import { expect, test } from "@playwright/test";
-import { chooseFirstAvailableSlot, loginAs, logout, openSpecialistProfile } from "./helpers";
+import { chooseFirstAvailableSlot, loginAs, loginWith, logout, openSpecialistProfileById, provisionBookingActors } from "./helpers";
 
 test.describe.serial("booking oversight flow", () => {
   test("user can request, specialist can confirm, and admin can see the appointment", async ({ page, request }) => {
     const bookingNote = `Playwright E2E ${Date.now()}`;
+    const { user, specialist } = await provisionBookingActors(request, "booking-flow");
 
-    await loginAs(page, "user");
-    await openSpecialistProfile(page, request);
+    await loginWith(page, user);
+    await openSpecialistProfileById(page, specialist);
     await chooseFirstAvailableSlot(page);
     await page.getByLabel("Notes").fill(bookingNote);
     await page.getByRole("button", { name: /request appointment/i }).click();
     await expect(page.getByText(/appointment request submitted\./i)).toBeVisible();
     await logout(page);
 
-    await loginAs(page, "specialist");
+    await loginWith(page, specialist);
     await page.goto("/specialist/appointments");
     const noteText = page.getByText(bookingNote);
     const specialistCard = noteText.locator("xpath=ancestor::div[contains(@class, 'rounded-[24px]')][1]");

@@ -3,6 +3,7 @@ export default defineConfig({
     testDir: "./tests/e2e",
     testMatch: "**/*.spec.ts",
     fullyParallel: false,
+    workers: 4,
     globalSetup: "./tests/e2e/global.setup.ts",
     retries: process.env.CI ? 2 : 0,
     reporter: process.env.CI ? [["html", { open: "never" }], ["list"]] : [["list"]],

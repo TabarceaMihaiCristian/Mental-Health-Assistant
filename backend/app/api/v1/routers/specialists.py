@@ -65,7 +65,7 @@ def list_specialists(_: CurrentUser, db: DbSession) -> list[SpecialistResponse]:
     return [SpecialistResponse.model_validate(item) for item in specialists]
 
 
-@router.get("/{specialist_id}")
+@router.get("/{specialist_id:uuid}")
 def get_specialist(
     specialist_id: UUID,
     _: CurrentUser,
@@ -84,7 +84,7 @@ def get_specialist(
     return SpecialistResponse.model_validate(specialist)
 
 
-@router.get("/{specialist_id}/availability")
+@router.get("/{specialist_id:uuid}/availability")
 def get_specialist_availability(
     specialist_id: UUID,
     _: CurrentUser,
@@ -116,7 +116,7 @@ def get_specialist_availability(
 
 
 @router.post(
-    "/{specialist_id}/reviews",
+    "/{specialist_id:uuid}/reviews",
     status_code=status.HTTP_201_CREATED,
 )
 def create_specialist_review(
@@ -137,7 +137,7 @@ def create_specialist_review(
     return SpecialistReviewResponse.model_validate(review)
 
 
-@router.put("/{specialist_id}/reviews/me")
+@router.put("/{specialist_id:uuid}/reviews/me")
 def update_my_specialist_review(
     specialist_id: UUID,
     payload: SpecialistReviewUpsertRequest,
@@ -363,3 +363,4 @@ def delete_my_time_off(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except SpecialistScheduleItemNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
