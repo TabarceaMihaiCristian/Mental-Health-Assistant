@@ -49,7 +49,7 @@ export function NotificationsPage() {
   }, [token]);
 
   return (
-    <AppShell title="Notifications" subtitle="This inbox is now backed by the real notification API.">
+    <AppShell title="Notifications" subtitle="Stay current with appointment updates, reminders, and care activity.">
       {error ? <div className="rounded-[28px] border border-[--destructive] bg-[--red-100] px-5 py-4 text-sm">{error}</div> : null}
       <div className="flex items-center gap-3">
         <Button variant="secondary" onClick={() => token && markAllNotificationsAsRead(token).then(() => loadNotifications())}>Mark all as read</Button>
@@ -57,7 +57,7 @@ export function NotificationsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Inbox</CardTitle>
-          <CardDescription>Appointment and reminder notifications delivered by the backend.</CardDescription>
+          <CardDescription>Review new updates, reminders, and care-related alerts.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {notifications.length === 0 ? <p className="text-sm text-[--muted-foreground]">No notifications yet.</p> : null}

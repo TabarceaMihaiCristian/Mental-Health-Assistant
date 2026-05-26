@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { loginWith, openSpecialistProfileById, provisionBookingActors, replaceSpecialistAvailability } from "./helpers";
+import { filterFutureSlots, listAvailableSlots, loginWith, openSpecialistProfileById, provisionBookingActors, replaceSpecialistAvailability, } from "./helpers";
 const apiBaseUrl = process.env.PW_API_BASE_URL?.trim() || "http://localhost:8000/api/v1";
 function addHours(iso, hours) {
     const date = new Date(iso);
@@ -22,16 +22,18 @@ async function createTimeOff(request, token, startDateTime) {
             reason: "Playwright schedule impact time off",
         },
     });
-    expect(response.ok()).toBeTruthy();
+    if (!response.ok()) {
+        throw new Error(`Time off creation failed: ${response.status()} ${await response.text()}`);
+    }
 }
 test.describe.serial("specialist schedule impact", () => {
     test("specialist time off removes a previously bookable slot from the user view", async ({ page, request }) => {
         const { user, specialist } = await provisionBookingActors(request, "schedule-impact-timeoff");
         await loginWith(page, user);
         await openSpecialistProfileById(page, specialist);
-        const initialSlots = await listSlotValues(page);
+        const initialSlots = filterFutureSlots(await listAvailableSlots(page));
         expect(initialSlots.length).toBeGreaterThan(0);
-        const blockedSlot = initialSlots[0];
+        const blockedSlot = initialSlots[0].value;
         await createTimeOff(request, specialist.token, blockedSlot);
         await page.reload();
         await expect.poll(async () => {
@@ -43,9 +45,9 @@ test.describe.serial("specialist schedule impact", () => {
         const { user, specialist } = await provisionBookingActors(request, "schedule-impact-availability");
         await loginWith(page, user);
         await openSpecialistProfileById(page, specialist);
-        const initialSlots = await listSlotValues(page);
+        const initialSlots = filterFutureSlots(await listAvailableSlots(page));
         expect(initialSlots.length).toBeGreaterThan(0);
-        const blockedSlot = initialSlots[0];
+        const blockedSlot = initialSlots[0].value;
         const blockedWeekday = new Date(blockedSlot).getUTCDay();
         await replaceSpecialistAvailability(request, specialist.token, [0, 1, 2, 3, 4].filter((weekday) => weekday !== blockedWeekday));
         await page.goto(`/specialists/${specialist.specialistId}`);

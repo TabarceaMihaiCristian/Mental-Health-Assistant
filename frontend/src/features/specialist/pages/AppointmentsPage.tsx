@@ -66,12 +66,12 @@ export function SpecialistAppointmentsPage() {
       setDateTime("");
       await loadAppointments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Mutation failed.");
+      setError(err instanceof Error ? err.message : "Unable to update the appointment.");
     }
   }
 
   return (
-    <AppShell role="specialist" title="Specialist appointments" subtitle="Specialist-side appointment decisions are now connected to the real backend.">
+    <AppShell role="specialist" title="Specialist appointments" subtitle="Review requests, confirm care, and manage schedule changes from one place.">
       {error ? <div className="rounded-[28px] border border-[--destructive] bg-[--red-100] px-5 py-4 text-sm">{error}</div> : null}
       <Card>
         <CardHeader>

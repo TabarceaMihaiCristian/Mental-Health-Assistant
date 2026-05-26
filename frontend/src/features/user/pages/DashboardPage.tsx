@@ -42,7 +42,7 @@ export function DashboardPage() {
   return (
     <AppShell
       title={user?.full_name ?? "Dashboard"}
-      subtitle="Your real backend data is now surfaced here: appointments, notifications, and the most recent mood summary."
+      subtitle="Keep track of upcoming care, recent updates, and your latest mood summary."
       actions={<ButtonLink to="/specialists" variant="secondary">Browse specialists</ButtonLink>}
     >
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -52,17 +52,17 @@ export function DashboardPage() {
           meta={nextAppointment?.specialist?.full_name ?? "Reserve a specialist slot to populate this card."}
           icon={<Calendar className="size-6" />}
         />
-        <StatCard title="Unread notifications" value={String(unreadCount)} meta="Live inbox count" icon={<Bell className="size-6" />} />
+        <StatCard title="Unread notifications" value={String(unreadCount)} meta="Waiting in your inbox" icon={<Bell className="size-6" />} />
         <StatCard
           title="Latest mood summary"
-          value={latestSummary?.dominant_mood ?? "No data"}
-          meta={latestSummary ? `Intensity ${latestSummary.average_intensity.toFixed(1)}` : "Generate a report after chat usage."}
+          value={latestSummary?.dominant_mood ?? "Not available"}
+          meta={latestSummary ? `Intensity ${latestSummary.average_intensity.toFixed(1)}` : "Chat check-ins and reports will populate this view."}
           icon={<MessageSquare className="size-6" />}
         />
         <StatCard
           title="Current risk state"
           value={latestSummary?.risk ?? "Unknown"}
-          meta={latestSummary?.summary_text ?? "Risk appears when mood summaries exist."}
+          meta={latestSummary?.summary_text ?? "Risk guidance appears once mood summaries are available."}
           icon={<ShieldAlert className="size-6" />}
         />
       </div>
@@ -70,11 +70,11 @@ export function DashboardPage() {
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Next good flow</CardTitle>
-            <CardDescription>All of these routes are now real app routes. The main remaining work is deeper backend coverage and refinement.</CardDescription>
+            <CardTitle>What to do next</CardTitle>
+            <CardDescription>Pick up where you left off and move to the area you need most.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
-            <ButtonLink to="/chat" className="justify-start rounded-[24px] px-5" size="lg"><MessageSquare className="size-5" /> Open AI chat</ButtonLink>
+            <ButtonLink to="/chat" className="justify-start rounded-[24px] px-5" size="lg"><MessageSquare className="size-5" /> Open support chat</ButtonLink>
             <ButtonLink to="/specialists" variant="secondary" className="justify-start rounded-[24px] px-5" size="lg"><Users className="size-5" /> Find specialists</ButtonLink>
             <ButtonLink to="/appointments" variant="secondary" className="justify-start rounded-[24px] px-5" size="lg"><Calendar className="size-5" /> Review appointments</ButtonLink>
             <ButtonLink to="/reports" variant="ghost" className="justify-start rounded-[24px] px-5" size="lg"><ShieldAlert className="size-5" /> Review reports</ButtonLink>
@@ -83,8 +83,8 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Session profile</CardTitle>
-            <CardDescription>Authenticated user data from the backend bootstrap.</CardDescription>
+            <CardTitle>Account overview</CardTitle>
+            <CardDescription>Your account snapshot for this workspace.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-[--muted-foreground]">
             <div>

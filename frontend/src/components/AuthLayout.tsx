@@ -7,7 +7,7 @@ export function AuthLayout() {
         <span className="eyebrow">Mental Health Assistant</span>
         <h1>Build a steady support loop around reflection, scheduling, and care.</h1>
         <p>
-          Start with authentication. Once this layer is solid, the rest of the frontend can build on a stable API session.
+          Sign in or create an account to access appointments, conversations, and care coordination in one place.
         </p>
         <div className="hero-links">
           <Link to="/login">Login</Link>

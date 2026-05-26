@@ -55,16 +55,16 @@ export function ReportsPage() {
   }
 
   return (
-    <AppShell title="Reports" subtitle="Daily summaries and generated weekly/monthly reports are now backed by the real reporting endpoints.">
+    <AppShell title="Reports" subtitle="Review mood patterns, daily summaries, and broader trends over time.">
       {error ? <div className="rounded-[28px] border border-[--destructive] bg-[--red-100] px-5 py-4 text-sm">{error}</div> : null}
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr_1fr]">
         <Card>
           <CardHeader>
             <CardTitle>Daily mood summaries</CardTitle>
-            <CardDescription>Stored daily analysis summaries from the backend.</CardDescription>
+            <CardDescription>Your recent daily mood snapshots and supporting notes.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {dailySummaries.length === 0 ? <p className="text-sm text-[--muted-foreground]">No daily summaries yet.</p> : null}
+            {dailySummaries.length === 0 ? <p className="text-sm text-[--muted-foreground]">No daily summaries yet. Check in through chat to start building them.</p> : null}
             {dailySummaries.map((summary) => (
               <div key={summary.id} className="rounded-[20px] border border-[--border] p-4">
                 <p className="font-semibold">{formatDateOnly(summary.summary_date)}</p>
@@ -82,7 +82,7 @@ export function ReportsPage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <CardTitle>{toTitleCase(key)} report</CardTitle>
-                  <CardDescription>{report ? `${formatDateOnly(report.period_start)} to ${formatDateOnly(report.period_end)}` : "Generate this report to view trends."}</CardDescription>
+                  <CardDescription>{report ? `${formatDateOnly(report.period_start)} to ${formatDateOnly(report.period_end)}` : "Generate this report to review patterns over time."}</CardDescription>
                 </div>
                 <Button variant="secondary" size="sm" onClick={() => void ensureReport(key as "weekly" | "monthly")}>
                   <RefreshCcw className="size-4" />
@@ -91,7 +91,7 @@ export function ReportsPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!report ? <p className="text-sm text-[--muted-foreground]">No generated report yet.</p> : null}
+              {!report ? <p className="text-sm text-[--muted-foreground]">No report generated yet.</p> : null}
               {report ? (
                 <>
                   <div className="rounded-[20px] bg-[--sand-100] p-4 text-sm text-[--foreground]">

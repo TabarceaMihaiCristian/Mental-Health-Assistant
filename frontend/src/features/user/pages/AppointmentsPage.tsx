@@ -99,7 +99,7 @@ export function AppointmentsPage() {
       setNextDateTime("");
       await reloadAppointments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Mutation failed.");
+      setError(err instanceof Error ? err.message : "Unable to update the appointment.");
     }
   }
 
@@ -119,11 +119,11 @@ export function AppointmentsPage() {
   return (
     <AppShell
       title="Appointments"
-      subtitle="This area is now connected to the real appointment API, including cancellation, rescheduling, and critical-care suggestions."
+      subtitle="Manage upcoming care, adjust plans when needed, and review past appointments."
       actions={
         <Button variant="secondary" onClick={() => void loadSuggestions()}>
           <Lightbulb className="size-4" />
-          Critical suggestions
+          Care suggestions
         </Button>
       }
     >
@@ -138,7 +138,7 @@ export function AppointmentsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {loading ? <p className="text-sm text-[--muted-foreground]">Loading appointments...</p> : null}
-            {!loading && grouped.mutable.length === 0 ? <p className="text-sm text-[--muted-foreground]">No mutable appointments yet.</p> : null}
+            {!loading && grouped.mutable.length === 0 ? <p className="text-sm text-[--muted-foreground]">No upcoming or pending appointments yet.</p> : null}
             {grouped.mutable.map((appointment) => (
               <div key={appointment.id} className="rounded-[24px] border border-[--border] bg-[--sand-50] p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
@@ -167,10 +167,10 @@ export function AppointmentsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Completed and closed</CardTitle>
-              <CardDescription>Historical appointments retained from the backend.</CardDescription>
+              <CardDescription>Past appointments and closed requests stay here for reference.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {grouped.history.length === 0 ? <p className="text-sm text-[--muted-foreground]">No historical appointments yet.</p> : null}
+              {grouped.history.length === 0 ? <p className="text-sm text-[--muted-foreground]">No past appointments yet.</p> : null}
               {grouped.history.map((appointment) => (
                 <div key={appointment.id} className="rounded-[20px] border border-[--border] p-4">
                   <p className="font-semibold">{appointment.specialist?.full_name ?? "Unknown specialist"}</p>
@@ -183,12 +183,12 @@ export function AppointmentsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Suggestions status</CardTitle>
+              <CardTitle>Care suggestions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {suggestions ? (
                 <>
-                  <p className="text-sm text-[--muted-foreground]">Found {suggestions.total_suggestions} critical-care slot suggestion(s).</p>
+                <p className="text-sm text-[--muted-foreground]">Found {suggestions.total_suggestions} time slot suggestion(s) for higher-priority care.</p>
                   {suggestions.suggestions.slice(0, 3).map((item) => (
                     <div key={`${item.specialist_id}-${item.start_datetime}`} className="rounded-[20px] border border-[--border] p-4">
                       <p className="font-semibold">{item.specialist_name}</p>
@@ -200,7 +200,7 @@ export function AppointmentsPage() {
               ) : suggestionsError ? (
                 <p className="text-sm text-[--muted-foreground]">{suggestionsError}</p>
               ) : (
-                <p className="text-sm text-[--muted-foreground]">Load critical suggestions when needed.</p>
+                <p className="text-sm text-[--muted-foreground]">Load care suggestions when you need faster support options.</p>
               )}
             </CardContent>
           </Card>
@@ -211,7 +211,7 @@ export function AppointmentsPage() {
         <div className="space-y-5">
           {activeAppointment ? (
             <div className="rounded-[20px] bg-[--sand-100] px-4 py-3 text-sm">
-              Current slot: {formatDateTime(activeAppointment.preferred_datetime)}
+              Current appointment: {formatDateTime(activeAppointment.preferred_datetime)}
             </div>
           ) : null}
           {mode === "reschedule" ? (

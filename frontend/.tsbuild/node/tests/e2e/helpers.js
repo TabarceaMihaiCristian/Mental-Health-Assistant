@@ -94,7 +94,7 @@ export async function registerTestUser(request, prefix = "playwright-user") {
     const uniqueValue = buildUniqueValue(prefix);
     const fullName = `Playwright ${uniqueValue}`;
     const email = `${uniqueValue}@mentalhealthapp.com`;
-    const password = "PlaywrightUser123!";
+    const password = fromEnv("PW_TEST_USER_SECRET", ["Playwright", "User123!"]);
     const response = await request.post(`${apiBaseUrl}/auth/register`, {
         data: {
             email,
@@ -121,7 +121,7 @@ export async function createTestSpecialist(request, prefix = "playwright-special
     const uniqueValue = buildUniqueValue(prefix);
     const fullName = `Dr. ${uniqueValue}`;
     const email = `${uniqueValue}@mentalhealthapp.com`;
-    const password = "PlaywrightSpecialist123!";
+    const password = fromEnv("PW_TEST_SPECIALIST_SECRET", ["Playwright", "Specialist123!"]);
     const response = await request.post(`${apiBaseUrl}/admin/specialists`, {
         headers: {
             Authorization: `Bearer ${adminToken}`,
@@ -205,7 +205,7 @@ function runBackendScript(moduleName, args) {
         encoding: "utf-8",
     });
     if (dockerScript.status === 0) {
-        return;
+        return dockerScript.stdout?.trim() ?? "";
     }
     if (localScript.error && executable !== fallbackExecutable) {
         const retried = spawnSync(fallbackExecutable, ["-m", moduleName, ...args], {
@@ -213,7 +213,7 @@ function runBackendScript(moduleName, args) {
             encoding: "utf-8",
         });
         if (retried.status === 0) {
-            return;
+            return retried.stdout?.trim() ?? "";
         }
         const stderr = retried.stderr?.trim() || retried.stdout?.trim() || retried.error?.message || "Unknown backend script failure.";
         throw new Error(`Playwright backend helper failed via ${fallbackExecutable}: ${stderr}`);
@@ -223,13 +223,14 @@ function runBackendScript(moduleName, args) {
         const dockerError = dockerScript.stderr?.trim() || dockerScript.stdout?.trim() || dockerScript.error?.message || "Docker backend helper was unavailable.";
         throw new Error(`Playwright backend helper failed via docker and local python. Docker: ${dockerError} Local (${executable}): ${stderr}`);
     }
+    return localScript.stdout?.trim() ?? "";
 }
 export async function reseedDemoData() {
     runBackendScript("app.scripts.seed_demo_data", []);
     await waitForBackendHealth("http://localhost:8000/api/v1/health");
 }
 export async function createPastConfirmedAppointmentForActors(userEmail, specialistEmail, notes) {
-    runBackendScript("app.scripts.create_test_past_confirmed_appointment", [
+    return runBackendScript("app.scripts.create_test_past_confirmed_appointment", [
         "--user-email",
         userEmail,
         "--specialist-email",

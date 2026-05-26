@@ -35,10 +35,10 @@ export function SpecialistDashboardPage() {
   const confirmedAppointments = appointments.filter((appointment) => appointment.status === "confirmed");
 
   return (
-    <AppShell role="specialist" title="Specialist dashboard" subtitle="This workspace is now connected to the specialist appointment API.">
+    <AppShell role="specialist" title="Specialist dashboard" subtitle="Track today’s care, open requests, and the shape of your upcoming schedule.">
       {error ? <div className="rounded-[28px] border border-[--destructive] bg-[--red-100] px-5 py-4 text-sm">{error}</div> : null}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Today’s appointments" value={String(todayAppointments.length)} meta="Live backend count" icon={<Calendar className="size-6" />} />
+        <StatCard title="Today’s appointments" value={String(todayAppointments.length)} meta="Scheduled for today" icon={<Calendar className="size-6" />} />
         <StatCard title="Pending requests" value={String(pendingRequests.length)} meta="Requires specialist action" icon={<Clock className="size-6" />} />
         <StatCard title="Confirmed appointments" value={String(confirmedAppointments.length)} meta="Upcoming care sessions" icon={<Users className="size-6" />} />
         <StatCard title="Total records" value={String(appointments.length)} meta="Current specialist workload" icon={<TrendingUp className="size-6" />} />
@@ -68,7 +68,7 @@ export function SpecialistDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Pending requests</CardTitle>
-            <CardDescription>Jump to the management route to confirm, reject, or reschedule.</CardDescription>
+            <CardDescription>Open the management view to confirm, reject, or reschedule requests.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {pendingRequests.slice(0, 4).map((request) => (

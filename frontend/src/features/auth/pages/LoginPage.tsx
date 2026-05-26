@@ -37,7 +37,7 @@ export function LoginPage() {
   }
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to continue your care journey." footnote="Protected by your backend authentication flow and session bootstrap endpoint.">
+    <AuthShell title="Welcome back" subtitle="Sign in to continue your care journey." footnote="Your information stays tied to your secure account session.">
       {error ? (
         <div className="mb-6 flex items-start gap-3 rounded-[24px] border border-[--destructive] bg-[--red-100] px-4 py-4 text-sm text-[--foreground]">
           <AlertCircle className="mt-0.5 size-5 shrink-0 text-[--destructive]" />

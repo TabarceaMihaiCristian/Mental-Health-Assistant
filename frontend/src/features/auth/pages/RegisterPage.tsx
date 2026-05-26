@@ -45,7 +45,7 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthShell title="Create your account" subtitle="Begin with a clean, secure workspace for support and specialist coordination." footnote="The visual treatment comes from the generated UI system; the submit path is your real backend auth API.">
+    <AuthShell title="Create your account" subtitle="Begin with a clean, secure workspace for support and specialist coordination." footnote="Create your account to book care, track progress, and stay in control of your plan.">
       {error ? <div className="mb-6 rounded-[24px] border border-[--destructive] bg-[--red-100] px-4 py-4 text-sm text-[--foreground]">{error}</div> : null}
       <form className="grid gap-5" onSubmit={handleSubmit}>
         <TextField label="Full name" type="text" autoComplete="name" placeholder="Jane Doe" value={fullName} onChange={(event) => setFullName(event.target.value)} required />

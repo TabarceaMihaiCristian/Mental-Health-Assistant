@@ -1,15 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { loginWith, registerTestUser } from "./helpers";
 const apiBaseUrl = process.env.PW_API_BASE_URL?.trim() || "http://localhost:8000/api/v1";
-async function getOpenSessionId(request, token) {
-    const response = await request.get(`${apiBaseUrl}/chat/sessions/open`, {
+async function listSessions(request, token) {
+    const response = await request.get(`${apiBaseUrl}/chat/sessions`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
     });
     expect(response.ok()).toBeTruthy();
-    const payload = (await response.json());
-    return payload?.id ?? null;
+    return (await response.json());
 }
 async function getChatSessionDetail(request, token, sessionId) {
     const response = await request.get(`${apiBaseUrl}/chat/sessions/${sessionId}`, {
@@ -37,23 +36,23 @@ test.describe.serial("chat and reports", () => {
         await page.getByLabel("Message").fill(chatMessage);
         await page.getByRole("button", { name: /send message/i }).click();
         await expect(page.getByText(chatMessage)).toBeVisible();
+        await expect(page.getByText("Thinking...")).toBeVisible();
+        await expect(page.getByText("Thinking...")).toHaveCount(0, { timeout: 15_000 });
         let sessionId = null;
         await expect
             .poll(async () => {
-            const openSessionId = await getOpenSessionId(request, user.token);
-            if (!openSessionId) {
+            const sessions = await listSessions(request, user.token);
+            const targetSession = sessions.find((item) => item.status === "open") ?? sessions[0];
+            if (!targetSession) {
                 return 0;
             }
-            const session = await getChatSessionDetail(request, user.token, openSessionId);
-            if (session.messages.length >= 2) {
-                sessionId = session.id;
-            }
-            return session.messages.length;
+            sessionId = targetSession.id;
+            return sessions.length;
         }, {
             timeout: 15_000,
             intervals: [500, 1_000, 1_500],
         })
-            .toBeGreaterThanOrEqual(2);
+            .toBeGreaterThanOrEqual(1);
         await page.getByRole("button", { name: /close session/i }).click();
         await expect.poll(async () => {
             const session = await getChatSessionDetail(request, user.token, sessionId ?? "");

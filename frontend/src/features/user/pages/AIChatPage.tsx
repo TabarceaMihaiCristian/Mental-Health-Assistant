@@ -262,7 +262,7 @@ export function AIChatPage() {
   return (
     <AppShell
       title="AI support chat"
-      subtitle="This workspace is backed by real chat sessions and assistant interactions."
+      subtitle="Talk through what you are feeling and keep your conversations organized in one place."
       actions={
         activeSession ? (
           <div className="flex flex-wrap gap-3">
@@ -301,7 +301,7 @@ export function AIChatPage() {
           </div>
           <div className="grid gap-2 p-4">
             {loading ? <p className="text-sm text-[--muted-foreground]">Loading sessions...</p> : null}
-            {!loading && sessions.length === 0 ? <p className="text-sm text-[--muted-foreground]">No sessions yet. Start a conversation to create one.</p> : null}
+            {!loading && sessions.length === 0 ? <p className="text-sm text-[--muted-foreground]">No conversations yet. Start a message when you are ready.</p> : null}
             {sessions.map((session) => (
               <button
                 key={session.id}
@@ -312,7 +312,7 @@ export function AIChatPage() {
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="font-semibold tracking-[-0.02em]">{session.summary ?? "Open support conversation"}</p>
+                  <p className="font-semibold tracking-[-0.02em]">{session.summary ?? "Support conversation"}</p>
                   <span className="text-xs text-[--muted-foreground] capitalize">{session.status}</span>
                 </div>
                 <p className="mt-2 text-sm text-[--muted-foreground]">{formatDateTime(session.last_message_at)}</p>
@@ -386,7 +386,7 @@ export function AIChatPage() {
 
       <Modal isOpen={hasCriticalSuggestions} title="Recommended care escalation" onClose={() => setSuggestions(null)}>
         <div className="space-y-5">
-          <p className="text-sm text-[--muted-foreground]">The assistant returned real appointment suggestions based on the current interaction.</p>
+          <p className="text-sm text-[--muted-foreground]">Based on this conversation, these care options may be worth reviewing next.</p>
           {suggestions?.suggestions.map((item) => (
             <div key={`${item.specialist_id}-${item.start_datetime}`} className="rounded-[24px] border border-[--border] p-4">
               <p className="font-semibold">{item.specialist_name}</p>

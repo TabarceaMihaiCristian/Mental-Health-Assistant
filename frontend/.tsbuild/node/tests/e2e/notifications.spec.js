@@ -9,6 +9,16 @@ async function clearNotifications(request, token) {
     });
     expect(response.ok()).toBeTruthy();
 }
+async function listNotifications(request, token) {
+    const response = await request.get(`${apiBaseUrl}/notifications?page=1&page_size=100`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    expect(response.ok()).toBeTruthy();
+    const payload = (await response.json());
+    return payload.items;
+}
 async function createAppointment(request, userToken, specialistId, notes) {
     const now = new Date();
     const dateFrom = now.toISOString().slice(0, 10);
@@ -62,10 +72,17 @@ test.describe.serial("notifications", () => {
         await appointmentCard.getByRole("button", { name: /^confirm$/i }).click();
         await expect(appointmentCard).toContainText(/confirmed/i);
         await logout(page);
+        await expect
+            .poll(async () => {
+            const items = await listNotifications(request, user.token);
+            return items.filter((item) => item.title === "Appointment confirmed").length;
+        })
+            .toBeGreaterThan(0);
         await loginWith(page, user);
         await page.goto("/notifications");
         const userNotification = page
             .getByText("Appointment confirmed")
+            .first()
             .locator("xpath=ancestor::div[contains(@class, 'rounded-[24px]')][1]");
         await expect(userNotification).toContainText(/unread/i);
         await userNotification.getByRole("button", { name: /mark read/i }).click();

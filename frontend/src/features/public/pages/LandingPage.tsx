@@ -52,11 +52,11 @@ export function LandingPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-semibold tracking-[-0.03em] md:text-4xl">Comprehensive mental health support</h2>
-            <p className="mx-auto mt-4 max-w-3xl text-[--muted-foreground]">The frontend you are integrating now is structured around these core product surfaces.</p>
+            <p className="mx-auto mt-4 max-w-3xl text-[--muted-foreground]">Everything is organized around the core moments that matter most in care and follow-through.</p>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
             {[
-              { icon: MessageSquare, title: "AI chat support", copy: "A calm conversation space with escalation paths into real care." },
+              { icon: MessageSquare, title: "AI chat support", copy: "A calm conversation space with clear next steps when deeper care may be helpful." },
               { icon: Users, title: "Specialist discovery", copy: "Browse licensed professionals by specialty, city, rating, and consultation mode." },
               { icon: Calendar, title: "Appointment coordination", copy: "Book, reschedule, confirm, and track care interactions from one place." },
               { icon: FileText, title: "Reports and summaries", copy: "Review mood summaries and support data with a clear, non-technical presentation." },
@@ -100,7 +100,7 @@ export function LandingPage() {
       <section className="mx-auto max-w-7xl rounded-[40px] bg-gradient-to-br from-[--teal-700] to-[--teal-900] px-6 py-16 text-center text-white md:px-10 md:py-20">
         <h2 className="text-3xl font-semibold tracking-[-0.03em] md:text-4xl">Built for users and specialists</h2>
         <p className="mx-auto mt-4 max-w-3xl text-[--teal-100]">
-          The generated Figma system also includes professional workspace patterns for specialists: daily overview, appointment requests, scheduling, and practice management.
+          Specialists also have a focused workspace for daily overview, appointment requests, scheduling, and practice management.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3 text-[--teal-100]">
           <div className="flex items-center gap-3"><CheckCircle className="size-5" /> Flexible scheduling</div>

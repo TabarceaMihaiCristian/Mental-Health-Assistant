@@ -70,7 +70,7 @@ export declare function provisionBookingActors(request: APIRequestContext, prefi
     };
 }>;
 export declare function reseedDemoData(): Promise<void>;
-export declare function createPastConfirmedAppointmentForActors(userEmail: string, specialistEmail: string, notes: string): Promise<void>;
+export declare function createPastConfirmedAppointmentForActors(userEmail: string, specialistEmail: string, notes: string): Promise<string>;
 export declare function getSeededSpecialistProfile(request: APIRequestContext): Promise<AdminSpecialistRecord>;
 export declare function openSpecialistProfileById(page: Page, specialist: {
     specialistId: string;

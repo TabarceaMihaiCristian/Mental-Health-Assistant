@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from sqlalchemy import delete, false, or_, select
 from sqlalchemy.orm import Session
@@ -107,7 +108,7 @@ def cleanup_playwright_data(session: Session) -> CleanupSummary:
 
     def delete_count(model_name: str, statement) -> None:
         result = session.execute(statement)
-        counts[model_name] = result.rowcount or 0
+        counts[model_name] = int(getattr(result, "rowcount", 0) or 0)
 
     if appointment_ids:
         delete_count(

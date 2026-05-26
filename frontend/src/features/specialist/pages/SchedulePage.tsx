@@ -100,7 +100,7 @@ export function SpecialistSchedulePage() {
   }
 
   return (
-    <AppShell role="specialist" title="Specialist schedule" subtitle="Availability, breaks, time off, and calendar summary are now connected to the backend.">
+    <AppShell role="specialist" title="Specialist schedule" subtitle="Shape your weekly availability, protect personal time, and review open capacity.">
       {error ? <div className="rounded-[28px] border border-[--destructive] bg-[--red-100] px-5 py-4 text-sm">{error}</div> : null}
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr_1fr]">
         <Card>
@@ -129,7 +129,7 @@ export function SpecialistSchedulePage() {
         <Card>
           <CardHeader>
             <CardTitle>Breaks and time off</CardTitle>
-            <CardDescription>Create real break and time-off records.</CardDescription>
+          <CardDescription>Block short breaks and longer time away from the calendar.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-[24px] bg-[--sand-50] p-4">
@@ -167,7 +167,7 @@ export function SpecialistSchedulePage() {
         <Card>
           <CardHeader>
             <CardTitle>Calendar summary</CardTitle>
-            <CardDescription>Backend summary for the selected time window.</CardDescription>
+          <CardDescription>Quick view of appointments and open slots in the selected window.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <TextField label="From" type="date" value={calendarDateFrom} onChange={(event) => setCalendarDateFrom(event.target.value)} />

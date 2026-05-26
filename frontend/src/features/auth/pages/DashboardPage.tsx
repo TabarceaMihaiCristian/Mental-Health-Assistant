@@ -19,8 +19,8 @@ export function DashboardPage() {
 
       <section className="card-grid">
         <article className="dashboard-card">
-          <h2>API Session Ready</h2>
-          <p>The frontend is connected to the backend auth flow and can now protect routes cleanly.</p>
+          <h2>Session ready</h2>
+          <p>Your account is active and you can move through the workspace securely.</p>
         </article>
         <article className="dashboard-card">
           <h2>Specialist Directory</h2>

@@ -63,7 +63,7 @@ export function SpecialistsListPage() {
   }, [query, specialists]);
 
   return (
-    <AppShell title="Active specialists" subtitle="This page now uses the generated design language while keeping the real backend directory integration.">
+    <AppShell title="Active specialists" subtitle="Explore available specialists and find the right fit for your next conversation.">
       <div className="max-w-xl">
         <TextField label="Search directory" type="search" placeholder="Search by name, specialty, city, or consultation mode" value={query} onChange={(event) => setQuery(event.target.value)} />
       </div>
@@ -74,7 +74,7 @@ export function SpecialistsListPage() {
       {!loading && filtered.length === 0 ? (
         <EmptyState
           title={specialists.length === 0 ? "No specialists available" : "No specialists match your filters"}
-          description={specialists.length === 0 ? "The backend returned an empty directory. Seed or create specialists before moving to booking." : "Try a broader query or clear the current search term."}
+          description={specialists.length === 0 ? "No specialists are available right now. Please check back soon." : "Try a broader query or clear the current search term."}
         />
       ) : null}
 
