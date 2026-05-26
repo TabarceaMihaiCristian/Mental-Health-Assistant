@@ -27,6 +27,7 @@ from app.models.specialist_review import SpecialistReview
 from app.models.specialist_time_off import SpecialistTimeOff
 from app.models.user import User
 from app.models.user_profile import UserProfile
+from app.scripts.cleanup_playwright_data import cleanup_playwright_data
 from app.services.availability_service import SLOT_DURATION
 
 
@@ -241,7 +242,9 @@ def main() -> None:
 
     with SessionLocal() as session:
         now = datetime.now(UTC)
+        cleanup_playwright_data(session)
         purge_legacy_demo_records(session)
+        purge_non_demo_specialists(session)
         accounts = ensure_demo_accounts(session)
         purge_orphaned_seed_specialists(session)
         reviewers = ensure_reviewer_accounts(session)
@@ -324,6 +327,52 @@ def purge_orphaned_seed_specialists(session: Session) -> None:
             Specialist.full_name.in_(seeded_names),
         )
     )
+    session.flush()
+
+
+def purge_non_demo_specialists(session: Session) -> None:
+    """Remove specialist rows and linked users that are not part of the deterministic demo set."""
+
+    allowed_specialist_emails = {spec.email for spec in SPECIALIST_SPECS}
+    removable_specialists = [
+        specialist
+        for specialist in session.scalars(select(Specialist)).all()
+        if specialist.user is None or specialist.user.email not in allowed_specialist_emails
+    ]
+    if not removable_specialists:
+        return
+
+    removable_specialist_ids = [specialist.id for specialist in removable_specialists]
+    removable_user_ids = [specialist.user_id for specialist in removable_specialists if specialist.user_id]
+
+    session.execute(
+        delete(Appointment).where(
+            (Appointment.specialist_id.in_(removable_specialist_ids))
+            | (Appointment.user_id.in_(removable_user_ids))
+        )
+    )
+    session.execute(
+        delete(SpecialistAvailabilityRule).where(
+            SpecialistAvailabilityRule.specialist_id.in_(removable_specialist_ids)
+        )
+    )
+    session.execute(
+        delete(SpecialistBreak).where(SpecialistBreak.specialist_id.in_(removable_specialist_ids))
+    )
+    session.execute(
+        delete(SpecialistTimeOff).where(
+            SpecialistTimeOff.specialist_id.in_(removable_specialist_ids)
+        )
+    )
+    session.execute(
+        delete(SpecialistReview).where(
+            SpecialistReview.specialist_id.in_(removable_specialist_ids)
+        )
+    )
+    session.execute(delete(Specialist).where(Specialist.id.in_(removable_specialist_ids)))
+    session.execute(delete(AuthIdentity).where(AuthIdentity.user_id.in_(removable_user_ids)))
+    session.execute(delete(UserProfile).where(UserProfile.user_id.in_(removable_user_ids)))
+    session.execute(delete(User).where(User.id.in_(removable_user_ids)))
     session.flush()
 
 
