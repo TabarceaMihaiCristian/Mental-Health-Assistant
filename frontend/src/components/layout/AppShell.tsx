@@ -89,9 +89,9 @@ export function AppShell({ title, subtitle, children, role, actions }: { title: 
         <div className="mt-auto rounded-[28px] border border-[--border] bg-white p-4 shadow-[var(--shadow-sm)]">
           <div className="flex items-center gap-3">
             <Avatar name={displayName} />
-            <div>
-              <p className="font-semibold tracking-[-0.02em]">{displayName}</p>
-              <p className="text-sm text-[--muted-foreground]">{emailLabel}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold tracking-[-0.02em]" title={displayName}>{displayName}</p>
+              <p className="break-all text-sm text-[--muted-foreground]" title={emailLabel}>{emailLabel}</p>
             </div>
           </div>
           <Button size="sm" className="mt-4 w-full justify-start rounded-2xl" onClick={logout}>
