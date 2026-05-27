@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models.appointment import Appointment
 from app.models.auth_identity import AuthIdentity
+from app.models.chat_message import ChatMessage
 from app.models.chat_session import ChatSession
 from app.models.daily_mood_summary import DailyMoodSummary
 from app.models.mood_analysis import MoodAnalysis
@@ -87,6 +88,17 @@ def cleanup_playwright_data(session: Session) -> CleanupSummary:
     specialist_ids = [specialist.id for specialist in playwright_specialists]
     specialist_user_ids = [specialist.user_id for specialist in playwright_specialists if specialist.user_id]
     all_user_ids = sorted({*user_ids, *specialist_user_ids})
+    prefixed_chat_sessions = list(
+        session.execute(
+            select(ChatSession.id, ChatSession.user_id)
+            .join(ChatMessage, ChatMessage.session_id == ChatSession.id)
+            .where(ChatMessage.content.startswith(PLAYWRIGHT_TEXT_PREFIX))
+            .distinct()
+        )
+    )
+    prefixed_chat_session_ids = [row[0] for row in prefixed_chat_sessions]
+    prefixed_chat_user_ids = [row[1] for row in prefixed_chat_sessions]
+    derived_cleanup_user_ids = sorted({*all_user_ids, *prefixed_chat_user_ids})
 
     appointment_ids = list(
         session.scalars(
@@ -127,12 +139,16 @@ def cleanup_playwright_data(session: Session) -> CleanupSummary:
     else:
         counts["notifications"] = 0
 
-    if all_user_ids:
-        delete_count("reports", delete(Report).where(Report.user_id.in_(all_user_ids)))
+    if derived_cleanup_user_ids:
+        delete_count("reports", delete(Report).where(Report.user_id.in_(derived_cleanup_user_ids)))
         delete_count(
             "daily_summaries",
-            delete(DailyMoodSummary).where(DailyMoodSummary.user_id.in_(all_user_ids)),
+            delete(DailyMoodSummary).where(DailyMoodSummary.user_id.in_(derived_cleanup_user_ids)),
         )
+    else:
+        counts.update(reports=0, daily_summaries=0)
+
+    if all_user_ids:
         delete_count(
             "mood_analyses",
             delete(MoodAnalysis).where(MoodAnalysis.user_id.in_(all_user_ids)),
@@ -143,7 +159,12 @@ def cleanup_playwright_data(session: Session) -> CleanupSummary:
         )
         delete_count(
             "chat_sessions",
-            delete(ChatSession).where(ChatSession.user_id.in_(all_user_ids)),
+            delete(ChatSession).where(
+                or_(
+                    ChatSession.user_id.in_(all_user_ids),
+                    ChatSession.id.in_(prefixed_chat_session_ids) if prefixed_chat_session_ids else false(),
+                )
+            ),
         )
         delete_count(
             "user_profiles",
@@ -155,14 +176,18 @@ def cleanup_playwright_data(session: Session) -> CleanupSummary:
         )
     else:
         counts.update(
-            reports=0,
-            daily_summaries=0,
             mood_analyses=0,
             risk_events=0,
-            chat_sessions=0,
             user_profiles=0,
             auth_identities=0,
         )
+        if prefixed_chat_session_ids:
+            delete_count(
+                "chat_sessions",
+                delete(ChatSession).where(ChatSession.id.in_(prefixed_chat_session_ids)),
+            )
+        else:
+            counts["chat_sessions"] = 0
 
     if specialist_ids:
         delete_count(

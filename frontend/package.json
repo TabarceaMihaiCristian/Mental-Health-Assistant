@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "test:e2e": "playwright test",
+    "cleanup:e2e-data": "node ./scripts/cleanup-playwright-data.mjs",
+    "test:e2e:raw": "playwright test",
+    "test:e2e": "node ./scripts/run-e2e-with-cleanup.mjs",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "node ./scripts/run-e2e-with-cleanup.mjs --headed"
   },
   "dependencies": {
     "lucide-react": "^0.542.0",

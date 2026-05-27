@@ -80,7 +80,7 @@ export function SpecialistsListPage() {
 
       <div className="grid gap-6 xl:grid-cols-2">
         {filtered.map((specialist) => (
-          <Card key={specialist.id}>
+          <Card key={specialist.id} className="flex h-full flex-col">
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -90,14 +90,14 @@ export function SpecialistsListPage() {
                 <Badge variant="success">{specialist.status}</Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="flex flex-1 flex-col gap-5">
               <p className="text-sm leading-7 text-[--muted-foreground]">{specialist.bio ?? "Profile details are available, but this specialist has not added a bio yet."}</p>
               <div className="grid gap-3 text-sm text-[--muted-foreground] md:grid-cols-2">
                 <div className="flex items-center gap-2"><MapPin className="size-4 text-[--primary]" /> {specialist.city ?? "City not set"}</div>
                 <div className="flex items-center gap-2"><Star className="size-4 text-[--amber-700]" /> {specialist.average_rating?.toFixed(1) ?? "No rating yet"} ({specialist.review_count} reviews)</div>
                 <div className="flex items-center gap-2 md:col-span-2"><Video className="size-4 text-[--primary]" /> {(specialist.consultation_modes ?? []).join(", ") || "Consultation modes not set"}</div>
               </div>
-              <ButtonLink to={`/specialists/${specialist.id}`} size="md">View specialist profile</ButtonLink>
+              <ButtonLink to={`/specialists/${specialist.id}`} size="md" className="mt-auto self-start">View specialist profile</ButtonLink>
             </CardContent>
           </Card>
         ))}

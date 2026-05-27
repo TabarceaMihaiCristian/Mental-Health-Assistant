@@ -73,7 +73,7 @@ export function DashboardPage() {
             <CardTitle>What to do next</CardTitle>
             <CardDescription>Pick up where you left off and move to the area you need most.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
+          <CardContent className="grid gap-4 pt-4 md:grid-cols-2">
             <ButtonLink to="/chat" className="justify-start rounded-[24px] px-5" size="lg"><MessageSquare className="size-5" /> Open support chat</ButtonLink>
             <ButtonLink to="/specialists" variant="secondary" className="justify-start rounded-[24px] px-5" size="lg"><Users className="size-5" /> Find specialists</ButtonLink>
             <ButtonLink to="/appointments" variant="secondary" className="justify-start rounded-[24px] px-5" size="lg"><Calendar className="size-5" /> Review appointments</ButtonLink>

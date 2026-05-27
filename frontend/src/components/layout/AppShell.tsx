@@ -94,7 +94,7 @@ export function AppShell({ title, subtitle, children, role, actions }: { title: 
               <p className="text-sm text-[--muted-foreground]">{emailLabel}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="mt-4 w-full justify-start rounded-2xl" onClick={logout}>
+          <Button size="sm" className="mt-4 w-full justify-start rounded-2xl" onClick={logout}>
             <LogOut className="size-4" />
             Logout
           </Button>

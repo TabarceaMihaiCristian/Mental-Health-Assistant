@@ -4,7 +4,7 @@ import { AppShell } from "../../../components/layout/AppShell";
 import { Button } from "../../../components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/Card";
 import { useAuth } from "../../../app/use-auth";
-import { generateReport, getReport, listDailyMoodSummaries } from "../../reports/reportsApi";
+import { generateReport, listDailyMoodSummaries } from "../../reports/reportsApi";
 import type { DailyMoodSummary, ReportResponse } from "../../../types/report";
 import { formatDateOnly, toTitleCase } from "../../../lib/format";
 
@@ -26,7 +26,7 @@ export function ReportsPage() {
       setError(null);
       try {
         const summaries = await listDailyMoodSummaries(token);
-        const [weekly, monthly] = await Promise.allSettled([getReport(token, "weekly"), getReport(token, "monthly")]);
+        const [weekly, monthly] = await Promise.allSettled([generateReport(token, "weekly"), generateReport(token, "monthly")]);
 
         if (cancelled) {
           return;

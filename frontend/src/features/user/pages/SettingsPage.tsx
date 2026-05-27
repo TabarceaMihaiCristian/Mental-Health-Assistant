@@ -146,7 +146,7 @@ export function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-[--muted-foreground]">
               <p>Use logout to clear the current authenticated workspace on this device.</p>
-              <Button variant="ghost" onClick={logout}>Logout</Button>
+              <Button onClick={logout}>Logout</Button>
             </CardContent>
           </Card>
         </div>
