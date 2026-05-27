@@ -6,11 +6,11 @@ type Variant = "primary" | "secondary" | "ghost" | "danger" | "success";
 type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-[--primary] text-white hover:bg-[--primary-hover] shadow-[var(--shadow-sm)]",
-  secondary: "bg-[--secondary] text-[--foreground] hover:bg-[--secondary-hover]",
+  primary: "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] shadow-[var(--shadow-sm)]",
+  secondary: "bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--secondary-hover)]",
   ghost: "bg-transparent text-[--foreground] hover:bg-[--accent]",
-  danger: "bg-[--destructive] text-white hover:bg-[--destructive-hover]",
-  success: "bg-[--success] text-white hover:brightness-95",
+  danger: "bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:bg-[var(--destructive-hover)]",
+  success: "bg-[var(--success)] text-[var(--success-foreground)] hover:brightness-95",
 };
 
 const sizeClasses: Record<Size, string> = {

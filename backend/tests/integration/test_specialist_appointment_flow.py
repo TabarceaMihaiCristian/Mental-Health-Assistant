@@ -30,6 +30,18 @@ def _next_weekday_datetime(
     return candidate + timedelta(days=days_ahead)
 
 
+def _future_datetime_at_hour(*, days_ahead: int, hour: int) -> datetime:
+    """Return a UTC datetime at least a fixed number of days in the future."""
+
+    now = datetime.now(UTC)
+    return (now + timedelta(days=days_ahead)).replace(
+        hour=hour,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+
+
 @pytest.mark.integration
 def test_specialist_can_confirm_requested_appointment(
     client: TestClient,
@@ -126,7 +138,7 @@ def test_specialist_can_reschedule_to_a_valid_available_slot(
     specialist = specialist_factory()
     specialist_user = specialist.user
     assert specialist_user is not None
-    original_start = _next_weekday_datetime(target_weekday=2, hour=9)
+    original_start = _future_datetime_at_hour(days_ahead=3, hour=9)
     new_start = original_start.replace(hour=11)
     availability_rule_factory(
         specialist_id=specialist.id,
@@ -176,7 +188,7 @@ def test_specialist_cannot_reschedule_to_an_unavailable_slot(
     specialist = specialist_factory()
     specialist_user = specialist.user
     assert specialist_user is not None
-    original_start = _next_weekday_datetime(target_weekday=3, hour=9)
+    original_start = _future_datetime_at_hour(days_ahead=3, hour=9)
     invalid_start = original_start.replace(hour=15)
     availability_rule_factory(
         specialist_id=specialist.id,

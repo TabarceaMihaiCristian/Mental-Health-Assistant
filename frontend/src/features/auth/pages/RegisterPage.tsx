@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../app/use-auth";
 import { AuthShell } from "../../../components/layout/AuthShell";
 import { Button } from "../../../components/ui/Button";
-import { SelectField, TextField } from "../../../components/ui/Fields";
+import { TextField } from "../../../components/ui/Fields";
 import { ApiError } from "../../../lib/api";
 import { readStoredAuth } from "../../../lib/auth-storage";
 import { getHomePathForRole } from "../../../lib/role-home";
@@ -15,7 +15,6 @@ export function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("user");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -23,11 +22,6 @@ export function RegisterPage() {
     event.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
-      return;
-    }
-
-    if (role !== "user") {
-      setError("Public registration is currently connected for user accounts only.");
       return;
     }
 
@@ -54,10 +48,6 @@ export function RegisterPage() {
           <TextField label="Password" type="password" autoComplete="new-password" placeholder="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
           <TextField label="Confirm password" type="password" autoComplete="new-password" placeholder="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required />
         </div>
-        <SelectField label="I am a..." value={role} onChange={(event) => setRole(event.target.value)}>
-          <option value="user">Individual seeking support</option>
-          <option value="specialist">Mental health specialist</option>
-        </SelectField>
         <label className="flex items-start gap-3 text-sm text-[--muted-foreground]">
           <input type="checkbox" required className="mt-1 size-4 rounded accent-[--primary]" />
           <span>I agree to the terms of service and privacy policy.</span>
