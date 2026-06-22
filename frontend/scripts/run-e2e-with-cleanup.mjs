@@ -8,6 +8,7 @@ const playwrightArgs = ["playwright", "test", ...process.argv.slice(2)];
 const playwrightResult = spawnSync(npxExecutable, playwrightArgs, {
   cwd: process.cwd(),
   stdio: "inherit",
+  shell: process.platform === "win32",
 });
 
 if (typeof playwrightResult.status === "number" && playwrightResult.status !== 0) {
