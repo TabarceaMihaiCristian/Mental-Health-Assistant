@@ -73,7 +73,7 @@ export function AdminDashboardPage() {
                 <div>
                   <p className="font-semibold tracking-[-0.02em]">{specialist.full_name}</p>
                   <p className="mt-1 text-sm text-[--muted-foreground]">{specialist.specialty}</p>
-                  <p className="mt-1 text-sm text-[--muted-foreground]">{specialist.city ?? "City not set"} · {specialist.email ?? "No email"}</p>
+                  <p className="mt-1 text-sm text-[--muted-foreground]">{specialist.city ?? "City not set"} - {specialist.email ?? "No email"}</p>
                 </div>
                 <Badge variant={badgeVariant(specialist.status)}>{toTitleCase(specialist.status)}</Badge>
               </div>

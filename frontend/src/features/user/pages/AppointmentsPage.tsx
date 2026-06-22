@@ -145,7 +145,7 @@ export function AppointmentsPage() {
                   <div>
                     <p className="text-lg font-semibold tracking-[-0.02em]">{appointment.specialist?.full_name ?? "Unknown specialist"}</p>
                     <p className="mt-2 text-sm text-[--muted-foreground]">{formatDateTime(appointment.preferred_datetime)}</p>
-                    <p className="mt-1 text-sm text-[--muted-foreground]">{toTitleCase(appointment.mode)} · {appointment.specialist?.specialty ?? "Specialist"}</p>
+                    <p className="mt-1 text-sm text-[--muted-foreground]">{toTitleCase(appointment.mode)} - {appointment.specialist?.specialty ?? "Specialist"}</p>
                   </div>
                   <Badge variant={appointment.status === "confirmed" ? "success" : "warning"}>{toTitleCase(appointment.status)}</Badge>
                 </div>
@@ -192,7 +192,7 @@ export function AppointmentsPage() {
                   {suggestions.suggestions.slice(0, 3).map((item) => (
                     <div key={`${item.specialist_id}-${item.start_datetime}`} className="rounded-[20px] border border-[--border] p-4">
                       <p className="font-semibold">{item.specialist_name}</p>
-                      <p className="mt-1 text-sm text-[--muted-foreground]">{item.specialty} · {item.city ?? "City not set"}</p>
+                      <p className="mt-1 text-sm text-[--muted-foreground]">{item.specialty} - {item.city ?? "City not set"}</p>
                       <p className="mt-1 text-sm text-[--muted-foreground]">{formatDateTime(item.start_datetime)}</p>
                     </div>
                   ))}

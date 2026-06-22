@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     backend_cors_origins: list[str] = Field(default_factory=list)
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-5-mini", alias="OPENAI_MODEL")
-    openai_max_output_tokens: int = 220
+    openai_max_output_tokens: int = 420
     assistant_max_context_messages: int = 12
     scheduler_enabled: bool = True
     scheduler_run_in_debug: bool = False

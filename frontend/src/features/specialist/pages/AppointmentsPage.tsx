@@ -86,7 +86,7 @@ export function SpecialistAppointmentsPage() {
                 <div>
                   <p className="text-lg font-semibold tracking-[-0.02em]">{appointment.user?.full_name ?? "Unknown patient"}</p>
                   <p className="mt-2 text-sm text-[--muted-foreground]">{formatDateTime(appointment.preferred_datetime)}</p>
-                  <p className="mt-1 text-sm text-[--muted-foreground]">{toTitleCase(appointment.mode)} · {appointment.notes ?? "No notes"}</p>
+                  <p className="mt-1 text-sm text-[--muted-foreground]">{toTitleCase(appointment.mode)} - {appointment.notes ?? "No notes"}</p>
                 </div>
                 <Badge variant={appointment.status === "confirmed" ? "success" : appointment.status === "requested" ? "warning" : "muted"}>{toTitleCase(appointment.status)}</Badge>
               </div>

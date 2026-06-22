@@ -143,7 +143,7 @@ export function SpecialistSchedulePage() {
             </div>
             {breaks.map((item) => (
               <div key={item.id} className="rounded-[20px] border border-[--border] p-4">
-                <p className="font-semibold">{weekdays[item.weekday]} · {item.label ?? "Break"}</p>
+                <p className="font-semibold">{weekdays[item.weekday]} - {item.label ?? "Break"}</p>
                 <p className="mt-1 text-sm text-[--muted-foreground]">{formatTimeOnly(item.start_time)} - {formatTimeOnly(item.end_time)}</p>
                 <Button variant="ghost" size="sm" className="mt-3" onClick={() => token && deleteBreak(token, item.id).then(() => loadSchedule())}>Delete</Button>
               </div>

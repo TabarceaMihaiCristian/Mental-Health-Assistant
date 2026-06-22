@@ -68,7 +68,7 @@ export function ReportsPage() {
             {dailySummaries.map((summary) => (
               <div key={summary.id} className="rounded-[20px] border border-[--border] p-4">
                 <p className="font-semibold">{formatDateOnly(summary.summary_date)}</p>
-                <p className="mt-1 text-sm text-[--muted-foreground]">{toTitleCase(summary.dominant_mood)} · risk {summary.risk}</p>
+                <p className="mt-1 text-sm text-[--muted-foreground]">{toTitleCase(summary.dominant_mood)} - risk {summary.risk}</p>
                 <p className="mt-1 text-sm text-[--muted-foreground]">Intensity {summary.average_intensity.toFixed(1)}</p>
                 {summary.summary_text ? <p className="mt-2 text-sm text-[--muted-foreground]">{summary.summary_text}</p> : null}
               </div>

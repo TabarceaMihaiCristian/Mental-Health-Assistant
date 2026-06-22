@@ -1,359 +1,568 @@
-﻿# Documenta?ie proiect: Mental Health Assistant
+Documentație proiect: Mental Health Assistant
 
-## Pagina de titlu
+Pagina de titlu
 
-**DOCUMENTA?IE TEHNICA DE PROIECT**
+DOCUMENTAȚIE TEHNICĂ DE PROIECT
 
-**Platforma software pentru asisten?a în sanatate mintala, interac?iune conversa?ionala ?i programari la speciali?ti**
+Platformă software pentru sprijin în sănătate mintală, interacțiune conversațională asistată și coordonarea programărilor la specialiști
 
 Autor: Mihai Tabarcea  
-Perioada documentata: starea curenta a proiectului la data de 4 mai 2026
-
----
-
-## Introducere
-
-Proiectul **Mental Health Assistant** este o aplica?ie software orientata catre sprijinirea utilizatorilor în gestionarea interac?iunilor legate de sanatatea mintala, oferind atât func?ionalita?i de conversa?ie asistata de inteligen?a artificiala, cât ?i mecanisme de programare la speciali?ti, generare de rapoarte, notificari ?i administrare a disponibilita?ii speciali?tilor.
-
-Solu?ia este dezvoltata pe o arhitectura separata **backend + frontend**, în care componenta back-end este deja matura din punct de vedere func?ional ?i opera?ional, iar componenta front-end se afla într-o etapa de construc?ie incrementala, având deja implementate autentificarea ?i primul flux real de produs: navigarea în directorul de speciali?ti.
-
-Scopul principal al aplica?iei este de a furniza o baza tehnica scalabila pentru urmatoarele scenarii:
-
-- autentificarea ?i autorizarea utilizatorilor pe roluri;
-- crearea ?i gestionarea sesiunilor de chat cu asistentul;
-- analiza starii emo?ionale ?i detectarea situa?iilor de risc;
-- recomandarea de programari catre speciali?ti în situa?ii critice;
-- gestionarea disponibilita?ii speciali?tilor ?i a programarilor;
-- notificarea utilizatorilor ?i generarea de rapoarte periodice.
-
-Din punct de vedere al stadiului curent, proiectul dispune de un back-end bine testat, cu integrare continua activa, configurare de deployment local ?i production-style, precum ?i de un front-end modern în React, conectat deja la fluxurile de autentificare ?i la directorul de speciali?ti.
-
-## Analiza cerin?elor
-
-### Obiectivele aplica?iei
-
-Aplica?ia urmare?te construirea unei platforme centralizate care sa permita atât suport conversa?ional, cât ?i gestionarea legaturii dintre utilizatori ?i speciali?ti. În forma actuala, obiectivele tehnice ?i func?ionale sunt:
-
-- furnizarea unui API securizat pentru utilizatori, speciali?ti ?i administratori;
-- modelarea unui flux de programari cu reguli de business clare;
-- integrarea unui asistent conversa?ional ?i a analizelor de tip mood/risk;
-- generarea de notificari ?i rapoarte pe baza datelor utilizatorului;
-- posibilitatea de administrare a speciali?tilor ?i a programului acestora;
-- men?inerea unei baze solide de testare, tipare ?i deployment.
-
-### Cerin?e func?ionale
-
-Pe baza implementarii curente, cerin?ele func?ionale deja acoperite de back-end sunt urmatoarele:
-
-1. **Autentificare ?i profil curent**
-- înregistrare utilizator local;
-- autentificare locala;
-- identificarea utilizatorului autentificat prin endpoint-ul `/auth/me`.
-
-2. **Gestionarea chat-ului**
-- creare sesiuni de chat;
-- listare sesiuni existente;
-- recuperarea sesiunii deschise;
-- adaugare mesaje într-o sesiune;
-- creare de interac?iuni complete utilizator-asistent.
-
-3. **Programari pentru utilizatori**
-- creare programare;
-- listare programari proprii;
-- vizualizare programare individuala;
-- anulare programare;
-- reprogramare programare;
-- ob?inere sugestii de programari pentru situa?ii critice.
-
-4. **Director ?i activita?i speciali?ti**
-- listare speciali?ti activi;
-- vizualizare profil specialist;
-- consultarea disponibilita?ii pe intervale de timp;
-- adaugare ?i actualizare recenzii;
-- gestionarea disponibilita?ii recurente;
-- gestionarea pauzelor recurente;
-- gestionarea intervalelor de time-off;
-- vizualizarea calendarului specialistului.
-
-5. **Programari pe partea specialistului**
-- listarea programarilor alocate;
-- creare programare în numele utilizatorului;
-- confirmare, respingere, reprogramare ?i completare programari.
-
-6. **Administrare**
-- onboarding ?i administrare speciali?ti;
-- modificarea profilului specialistului;
-- modificarea statusului specialistului;
-- listarea ?i consultarea programarilor din perspectiva administrativa.
-
-7. **Notificari ?i rapoarte**
-- listare notificari;
-- numar notificari necitite;
-- marcare notificari ca citite/necitite;
-- opera?ii bulk pe notificari;
-- generarea ?i consultarea rapoartelor periodice;
-- listarea sumarizarilor zilnice de stare emo?ionala.
-
-### Cerin?e non-func?ionale
-
-Cerin?ele non-func?ionale deja adresate în proiect sunt:
-
-- **securitate**: autentificare pe baza de JWT ?i protec?ia rutelor sensibile;
-- **modularitate**: separare clara pe layere pentru modele, scheme, servicii, repository-uri ?i routere;
-- **testabilitate**: suita extinsa de teste unitare ?i de integrare;
-- **tipare ?i consisten?a**: utilizarea validarii Pydantic, type checking cu Pyright ?i linting cu Ruff/ESLint;
-- **portabilitate**: rulare locala ?i în containere Docker;
-- **observabilitate minima**: endpoint-uri de health pentru API, baza de date ?i scheduler;
-- **mentenabilitate**: flux CI cu validari automate.
-
-### Tehnologii utilizate
-
-#### Back-end
-- Python 3.13
-- FastAPI
-- SQLAlchemy
-- Alembic
-- PostgreSQL
-- APScheduler
-- OpenAI SDK
-- passlib + bcrypt
-- python-jose
-- pydantic-settings
-- psycopg
+Perioada documentată: starea curentă a proiectului la data de 8 iunie 2026
 
-#### Front-end
-- React 19
-- TypeScript
-- Vite
-- React Router
-- ESLint
 
-#### Testare ?i calitate
-- Pytest
-- Ruff
-- Pyright
-- ESLint
 
-#### Deployment ?i DevOps
-- Docker
-- Docker Compose
-- GitHub Actions
+Termeni explicați și abrevieri
 
-## Arhitectura generala a aplica?iei
+API - Application Programming Interface; interfață prin care componentele software comunică între ele.
+CRUD - Create, Read, Update, Delete; operațiile de bază asupra datelor.
+CI - Continuous Integration; execuție automată a validărilor la modificarea codului.
+CORS - Cross-Origin Resource Sharing; mecanism de control al accesului între origini diferite.
+E2E - End-to-End; teste care validează un flux complet din perspectiva utilizatorului.
+ERD - Entity-Relationship Diagram; diagramă a entităților și a relațiilor din baza de date.
+HTTP - HyperText Transfer Protocol; protocol utilizat pentru comunicarea web.
+JSON - JavaScript Object Notation; format standard de schimb de date.
+JWT - JSON Web Token; mecanism de autentificare bazat pe token.
+ORM - Object-Relational Mapping; tehnică de mapare a obiectelor aplicației la tabele relaționale.
+REST - stil arhitectural pentru servicii web bazate pe resurse și metode HTTP.
+UI - User Interface; interfața grafică a aplicației.
+UX - User Experience; experiența generală a utilizatorului în interacțiunea cu aplicația.
 
-Aplica?ia este construita pe o arhitectura de tip client-server, cu separare clara între componenta de prezentare ?i componenta de business logic.
+Introducere
 
-### Arhitectura back-end-ului
+Context și motivație
 
-Componenta back-end este organizata în jurul framework-ului FastAPI ?i include urmatoarele zone principale:
+În contextul actual, aplicațiile software orientate către sănătate mintală trebuie să rezolve simultan mai multe tipuri de probleme: suport conversațional, înregistrarea activității utilizatorului, relaționarea cu specialiști umani, coordonarea programărilor și prezentarea într-o formă clară a informațiilor relevante pentru utilizator. În practică, multe soluții tratează aceste componente separat, ceea ce conduce la experiențe fragmentate, la dublarea datelor și la dificultăți în urmărirea istoricului unui utilizator.
 
-- `app/api/v1/routers` pentru expunerea endpoint-urilor REST;
-- `app/services` pentru logica aplica?iei;
-- `app/repositories` pentru accesul la date;
-- `app/models` pentru modelarea rela?ionala a entita?ilor;
-- `app/schemas` pentru validarea ?i serializarea payload-urilor;
-- `app/core` pentru configurare, securitate ?i autorizare;
-- `app/jobs` pentru scheduler ?i joburi periodice;
-- `app/utils` pentru logging ?i validari auxiliare.
+Proiectul Mental Health Assistant a fost construit tocmai pentru a reuni aceste fluxuri într-o singură platformă. Aplicația oferă o bază comună pentru utilizatori, specialiști și administratori și urmărește să reducă fragmentarea dintre zona de conversație, zona de monitorizare a stării emoționale și zona de programări.
 
-Aceasta organizare reduce cuplajul dintre componente ?i permite evolu?ia independenta a logicii de domeniu, a modelelor ?i a expunerii API.
+Scopul aplicației
 
-### Arhitectura front-end-ului
+Scopul principal al aplicației este furnizarea unei platforme centralizate pentru:
 
-Front-end-ul este organizat modular ?i urmare?te aceea?i separare a responsabilita?ilor:
+susținerea utilizatorilor prin conversații structurate și suport AI;
+monitorizarea evoluției emoționale prin sumarizări și rapoarte;
+direcționarea utilizatorilor către specialiști atunci când este necesar;
+gestionarea programărilor și a disponibilității într-un mod coerent;
+administrarea controlată a conturilor de specialist și a activității operaționale.
 
-- `src/app` pentru infrastructura aplica?iei ?i contextul de autentificare;
-- `src/features` pentru func?ionalita?i verticale, cum ar fi autentificarea ?i speciali?tii;
-- `src/routes` pentru protec?ia ?i definirea rutelor;
-- `src/lib` pentru clientul API, configura?ie ?i persistarea sesiunii;
-- `src/types` pentru tipurile TypeScript partajate;
-- `src/styles` pentru stilizarea globala.
+Starea actuală a proiectului
 
-În starea curenta, front-end-ul implementeaza:
+În starea actuală, proiectul nu mai reprezintă doar o bază de backend cu un frontend parțial. Aplicația conține fluxuri funcționale pentru toate cele trei roluri importante din sistem:
 
-- autentificare ?i înregistrare;
-- restaurarea sesiunii prin `/auth/me`;
-- protec?ia rutelor pentru utilizatorii autentifica?i;
-- redirec?ionare pentru rutele guest-only;
-- listarea directorului de speciali?ti;
-- pagina de detaliu pentru specialist.
+utilizator;
+specialist;
+administrator.
 
-### Persisten?a ?i date
+Backend-ul este structurat, tipizat și validat extensiv, iar frontend-ul este conectat la fluxurile reale de produs și include interfețe dedicate pentru dashboard, chat, programări, notificări, rapoarte și administrare.
 
-Baza de date rela?ionala este PostgreSQL, accesata prin SQLAlchemy ?i gestionata prin migra?ii Alembic. Modelele existente acopera domeniile principale ale aplica?iei:
+Documentația de față reflectă exclusiv starea curentă a aplicației. Partea de deployment nu este inclusă, deoarece proiectul nu mai urmărește documentarea livrării într-un mediu de producție în această etapă.
 
-- utilizatori ?i identita?i de autentificare;
-- sesiuni ?i mesaje de chat;
-- analize de stare emo?ionala ?i evenimente de risc;
-- speciali?ti, recenzii ?i reguli de disponibilitate;
-- programari;
-- notificari;
-- rapoarte ?i sumarizari zilnice.
+Obiectivele aplicației
 
-### Execu?ie ?i deployment
+Aplicația urmărește atingerea următoarelor obiective tehnice și funcționale:
 
-Proiectul include doua moduri de rulare cu Docker Compose:
+furnizarea unui API securizat și clar delimitat pe roluri;
+modelarea explicită a fluxurilor de programare, anulare și reprogramare;
+integrarea unui asistent conversațional cu analiză emoțională;
+generarea de notificări și rapoarte relevante pentru activitatea utilizatorului;
+administrarea specialiștilor și a calendarului acestora;
+menținerea unei baze solide de validare automată, testare și cur--are pentru datele de test.
 
-- **mod de dezvoltare**: cu bind mount ?i `uvicorn --reload`;
-- **mod production-style**: fara bind mount, fara reload, cu entrypoint care a?teapta baza de date ?i ruleaza migra?iile.
+Analiza cerințelor
 
-Containerul back-end utilizeaza un entrypoint dedicat care:
+Descriere funcțională generală
 
-1. a?teapta disponibilitatea bazei de date;
-2. ruleaza `alembic upgrade head` când `AUTO_MIGRATE=true`;
-3. porne?te serverul aplica?iei.
+Mental Health Assistant este o aplicație full-stack care centralizează mai multe procese specifice unei platforme de sprijin în sănătate mintală:
 
-Aplica?ia expune endpoint-uri de health pentru:
+gestionarea autentificării și a sesiunii;
+comunicarea cu un asistent AI;
+analizarea mesajelor din perspectivă emoțională și de risc;
+interacțiunea cu directorul de specialiști;
+gestionarea programărilor din perspectiva utilizatorului și a specialistului;
+notificarea și raportarea activității relevante.
 
-- procesul API;
-- conectivitatea la baza de date;
-- starea scheduler-ului.
+Din punct de vedere operațional, aplicația permite unui utilizator să își creeze cont, să converseze cu asistentul, să primească sumarizări și rapoarte pe baza mesajelor sale, să consulte specialiști și să ceară programări. Specialistul poate gestiona programările și disponibilitatea sa, iar administratorul poate administra specialiștii și urmări programările la nivel de supraveghere.
 
-## Implementarea back-end-ului
+Identificarea utilizatorilor și a rolurilor
 
-### Configurare ?i ini?ializare
+Sistemul lucrează cu trei roluri distincte:
 
-Aplica?ia FastAPI este ini?ializata printr-un entrypoint central, iar configura?ia este administrata dintr-un modul dedicat. Printre valorile importante de configurare se afla:
+Utilizator
 
-- `DATABASE_URL`;
-- `SECRET_KEY`;
-- `OPENAI_API_KEY`;
-- setarile pentru scheduler;
-- regulile de booking ?i reschedule;
-- configura?ia CORS.
+Utilizatorul reprezintă persoana care caută suport și care poate:
 
-Acest model centralizat face posibila separarea clara între medii de dezvoltare, test ?i produc?ie.
+să își creeze cont prin interfața publică;
+să utilizeze chat-ul cu asistentul;
+să consulte specialiștii activi;
+să facă, anuleze și replanifice programări;
+să consulte rapoarte, sumarizări și notificări;
+să își administreze setările contului.
 
-### Autentificare ?i autorizare
+Specialist
 
-Autentificarea este implementata local, pe baza de email ?i parola, iar autorizarea se bazeaza pe roluri. Fluxul actual cuprinde:
+Specialistul reprezintă profesionistul disponibil în platformă și poate:
 
-- înregistrarea utilizatorilor;
-- autentificarea ?i emiterea token-ului;
-- rezolvarea utilizatorului curent;
-- protec?ia rutelor prin dependen?e FastAPI;
-- verificarea explicita a utilizatorilor cu rol de specialist pentru rutele specifice.
+să consulte dashboard-ul propriu;
+să vizualizeze programările asociate;
+să confirme, respingă, reprogrameze sau finalizeze programări;
+să își configureze disponibilitatea;
+să adauge pauze recurente și intervale de indisponibilitate;
+să consulte notificările și să își administreze sesiunea.
 
-Aceasta abordare permite pastrarea unei interfe?e API coerente ?i a unei logici explicite de control al accesului.
+Administrator
 
-### Domeniile func?ionale implementate
+Administratorul are rol de supraveghere și configurare operațională și poate:
 
-Back-end-ul acopera mai multe subdomenii deja opera?ionale:
+să consulte dashboard-ul administrativ;
+să creeze și să gestioneze specialiști;
+să activeze sau să dezactiveze profiluri de specialist;
+să urmărească și să filtreze programările;
+să acceseze notificările comune din platformă.
 
-#### 1. Chat ?i analiza contextuala
-Sistemul permite crearea de sesiuni de chat ?i transmiterea mesajelor. Acest strat reprezinta baza pentru integrarea raspunsurilor generate de modelul OpenAI ?i pentru analiza starii emo?ionale a utilizatorului.
+Observație privind înregistrarea publică
 
-#### 2. Analiza de mood ?i risc
-Aplica?ia include servicii pentru analiza de mood ?i pentru generarea de evenimente de risc. Acestea sunt folosite drept baza pentru identificarea situa?iilor critice ?i pentru declan?area fluxurilor de recomandare a programarilor.
+În starea actuală a aplicației:
 
-#### 3. Speciali?ti ?i disponibilitate
-Back-end-ul ofera un director de speciali?ti, un model de recenzii ?i o infrastructura completa pentru gestionarea disponibilita?ii recurente, a pauzelor ?i a intervalelor de indisponibilitate. De asemenea, pot fi calculate sloturile disponibile într-o fereastra de timp.
+înregistrarea publică este disponibilă doar pentru utilizatori;
+conturile de specialist nu se creează public;
+specialiștii sunt creați doar de administratori.
 
-#### 4. Programari
-Fluxul de programari include atât perspectiva utilizatorului final, cât ?i perspectiva specialistului. Sunt implementate reguli privind notificarea, confirmarea, respingerea ?i reprogramarea programarilor, precum ?i generarea sugestiilor pentru cazuri critice.
+Această regulă este importantă și trebuie reținută atât din punct de vedere funcțional, cât și din punct de vedere al interpretării interfeței.
 
-#### 5. Notificari
-Aplica?ia ofera endpoint-uri pentru listarea ?i administrarea notificarilor, inclusiv opera?ii bulk ?i contorizarea elementelor necitite.
+Cerințe funcționale
 
-#### 6. Rapoarte
-Sistemul permite generarea ?i consultarea rapoartelor pe perioade ?i a sumarizarilor zilnice. Aceasta componenta pregate?te terenul pentru analize mai bogate asupra activita?ii ?i a evolu?iei starii utilizatorului.
+1. Autentificare și conturi
 
-### Testare, calitate ?i validare
+Sunt implementate:
 
-Back-end-ul se afla într-o stare buna de maturitate din perspectiva validarii automate. La momentul actual:
+înregistrare publică pentru utilizatori;
+autentificare locală pe bază de email și parolă;
+identificarea utilizatorului curent;
+restaurarea sesiunii după refresh;
+logout și protecția rutelor;
+resetare parolă.
 
-- suita completa de teste back-end ruleaza cu succes;
-- exista aproximativ **140 de teste** unitare ?i de integrare;
-- acoperirea totala raportata a fost de aproximativ **94%**;
-- verificarile automate includ **Ruff**, **Pyright** ?i **Pytest**;
-- pipeline-ul de CI ruleaza prin GitHub Actions.
+2. Chat și suport conversațional
 
-Aceasta baza ofera un nivel ridicat de încredere în stabilitatea componentelor deja implementate.
+Aplicația permite:
 
-## Implementarea front-end-ului
+crearea unei sesiuni noi de chat;
+reutilizarea sesiunii deschise;
+trimiterea de mesaje către asistent;
+închiderea conversațiilor;
+arhivarea sesiunilor;
+păstrarea istoricului conversațiilor.
 
-### Stack ?i structura
+3. Analiză emoțională și risc
 
-Front-end-ul este dezvoltat cu React, TypeScript ?i Vite. Alegerea acestui stack ofera:
+Pe baza mesajelor utilizatorului, sistemul generează:
 
-- pornire rapida ?i feedback scurt în dezvoltare;
-- model componentizat ?i extensibil;
-- tipare moderne pentru validarea statica a codului;
-- integrare simpla cu API-ul REST al back-end-ului.
+analize individuale de mood;
+evaluări de intensitate și risc;
+sumarizări zilnice ale stării dominante;
+evidențierea trigger-elor frecvente;
+evenimente de risc atunci când mesajele indică situații sensibile.
 
-### Autentificare ?i gestionarea sesiunii
+4. Programări pentru utilizatori
 
-Primul flux complet implementat în front-end este fluxul de autentificare. Acesta include:
+Din perspectiva utilizatorului sunt implementate:
 
-- pagina de login;
-- pagina de register;
-- context de autentificare ?i hooks dedicate;
-- persistarea token-ului în `localStorage`;
-- restaurarea sesiunii pe refresh prin endpoint-ul `/auth/me`;
-- rute protejate ?i rute disponibile doar pentru utilizatori neautentifica?i.
+consultarea directorului de specialiști;
+vizualizarea profilului și a sloturilor disponibile;
+cererea unei programări;
+listarea programărilor proprii;
+anularea unei programări;
+reprogramarea unei programări;
+vizualizarea stărilor relevante pentru fiecare programare.
 
-Fluxul a fost verificat manual ?i func?ioneaza corect pentru:
+5. Funcționalități pentru specialiști
 
-- înregistrare;
-- autentificare;
-- logout;
-- men?inerea sesiunii dupa refresh;
-- redirec?ionare corecta între zone publice ?i protejate.
+Din perspectiva specialistului sunt implementate:
 
-### Directorul de speciali?ti
+dashboard dedicat;
+listarea programărilor asociate;
+confirmarea unei programări;
+respingerea unei cereri;
+reprogramarea unei programări;
+marcarea unei programări ca finalizată;
+gestionarea disponibilității recurente;
+gestionarea pauzelor recurente;
+gestionarea intervalelor de indisponibilitate;
+consultarea calendarului de lucru.
 
-Al doilea flux implementat în front-end este directorul de speciali?ti. În starea actuala exista:
+6. Funcționalități administrative
 
-- pagina de listare a speciali?tilor activi;
-- pagina de detaliu pentru un specialist;
-- integrare cu endpoint-urile protejate ale back-end-ului;
-- gestionare a starilor de loading, eroare ?i lista goala.
+Din perspectiva administratorului sunt implementate:
 
-Acest flux este primul exemplu de extindere a front-end-ului dincolo de autentificare ?i reprezinta baza pentru viitoarea implementare a programarilor din interfa?a.
+dashboard administrativ;
+creare conturi și profiluri de specialist;
+activare și dezactivare specialist;
+actualizare date de profil;
+filtrare programări pe stări și intervale;
+consultarea programărilor din perspectiva de supraveghere.
 
-### Validare front-end
+7. Notificări și rapoarte
 
-Front-end-ul dispune în prezent de:
+Sunt implementate:
 
-- validare prin `npm run lint`;
-- validare de build prin `npm run build`;
-- verificare manuala a fluxurilor de autentificare ?i specialist directory.
+listarea notificărilor;
+contor pentru notificările necitite;
+marcare citit și necitit;
+operații bulk pe notificări;
+generarea și afișarea rapoartelor săptămânale și lunare;
+listarea sumarizărilor zilnice;
+sincronizarea rapoartelor cu datele curente disponibile.
 
-Nu exista înca, în starea actuala, o suita de teste automate E2E sau component-level pentru front-end. Aceasta reprezinta una dintre direc?iile naturale de extindere, alaturi de integrarea Playwright.
+Cerințe non-funcționale
 
-### Limite ?i stadiul actual al interfe?ei
+În starea actuală, aplicația acoperă următoarele cerințe non-funcționale:
 
-Documenta?ia trebuie sa reflecte starea reala a proiectului. În acest moment:
+securitate: autentificare JWT și protecția rutelor sensibile;
+modularitate: separare clară între modele, scheme, servicii, straturile de acces la date și routere;
+testabilitate: backend testat unitar și prin integrare, frontend validat prin lint -i build și prin fluxuri E2E;
+consistență: verificare de tipuri și linting pe ambele componente;
+portabilitate locală: rulare locală și în containere Docker pentru dezvoltare și testare;
+mentenabilitate: flux de integrare continu- și set de date ini-ial determinist pentru date locale;
+igienă a datelor de test: cur--are automat al datelor Playwright după rularea cu succes a testelor E2E.
 
-- back-end-ul este avansat ?i con?ine majoritatea fluxurilor de domeniu;
-- front-end-ul este într-o etapa intermediara de dezvoltare;
-- fluxurile de chat, notificari, rapoarte ?i programari nu sunt înca expuse integral în interfa?a;
-- directorul de speciali?ti este implementat, dar fluxul de booking din UI urmeaza sa fie realizat.
+Specificații tehnice
 
-## Concluzii ?i direc?ii viitoare
+Backend
 
-Proiectul **Mental Health Assistant** se afla într-o etapa solida din perspectiva infrastructurii, a modelului de date ?i a componentelor back-end. Arhitectura este coerenta, stratificata ?i sus?inuta de testare automata ?i deployment local bine definit.
+Python 3.13
+FastAPI
+SQLAlchemy
+Alembic
+PostgreSQL
+APScheduler
+OpenAI SDK
+passlib + bcrypt
+python-jose
+pydantic-settings
+psycopg
 
-Cele mai importante rezultate atinse pâna în prezent sunt:
+Frontend
 
-- definirea unei arhitecturi back-end robuste cu FastAPI, SQLAlchemy ?i PostgreSQL;
-- implementarea unui domeniu func?ional bogat: autentificare, chat, speciali?ti, programari, notificari, rapoarte ?i joburi programate;
-- configurarea unui pipeline CI cu linting, type checking ?i testare automata;
-- pregatirea unei baze de deployment cu mod development ?i mod production-style;
-- construirea unui front-end modern ?i conectarea lui la fluxurile critice ini?iale.
+React 19
+TypeScript
+Vite
+React Router
+Lucide React
+ESLint
 
-Direc?iile viitoare de dezvoltare sunt clare:
+Testare și calitate
 
-1. implementarea completa în front-end a fluxului de programari;
-2. conectarea interfe?ei la fluxurile de chat ?i asistent AI;
-3. expunerea în UI a notificarilor ?i rapoartelor;
-4. introducerea testarii E2E cu Playwright;
-5. consolidarea documenta?iei opera?ionale ?i a politicilor de deployment;
-6. eventuala întarire a strategiei de securitate prin mutarea sesiunii catre cookie-uri `HttpOnly`, daca produsul va necesita acest lucru.
+Pytest
+Ruff
+Pyright
+ESLint
+Playwright
 
-În concluzie, proiectul are deja o funda?ie tehnica matura ?i extensibila. Valoarea imediata a stadiului curent consta în faptul ca infrastructura critica a fost deja stabilizata, iar dezvoltarea ulterioara poate continua concentrat pe fluxurile de produs din interfa?a.
+Suport operațional local
 
-## Bibliografie
+Docker
+Docker Compose
+GitHub Actions
+
+Proiectarea aplicației
+
+Arhitectura generală a aplicației
+
+Aplicația urmează o arhitectură de tip client-server, cu separare clară între componenta de prezentare și componenta de business logic.
+
+Structura generală este împărțită în două componente principale:
+
+frontend, responsabil pentru interfața utilizatorului și navigația pe roluri;
+backend, responsabil pentru logica de business, persistență și expunerea API-ului.
+
+Arhitectura backend-ului
+
+Backend-ul este organizat în jurul FastAPI și include următoarele zone principale:
+
+app/api/v1/routers pentru endpoint-uri REST;
+app/services pentru logica de business;
+app/repositories pentru accesul la date;
+app/models pentru modelele ORM;
+app/schemas pentru validare și serializare;
+app/core pentru configurare, securitate și autorizare;
+app/jobs pentru procese programate;
+app/scripts pentru seed și cur--are;
+app/utils pentru logging și validări auxiliare.
+
+Această structură permite o evoluție controlată a aplicației și reduce dependențele directe între componente.
+
+Arhitectura frontend-ului
+
+Frontend-ul este organizat modular și urmează aceeași separare a responsabilităților:
+
+src/app pentru infrastructura aplicației și furnizorul de autentificare;
+src/features pentru funcționalități verticale;
+src/components pentru interfa-- reutilizabil-;
+src/routes pentru definirea și protejarea rutelor;
+src/lib pentru clientul API, configurație și utilitare;
+src/types pentru tipurile TypeScript partajate;
+src/styles pentru temă și stiluri globale.
+
+În forma actuală, frontend-ul include pagini și fluxuri pentru:
+
+autentificare și resetare parolă;
+landing page publică;
+dashboard utilizator;
+chat AI;
+director de specialiști și pagină de detaliu;
+programări utilizator;
+rapoarte;
+notificări;
+setări cont;
+dashboard specialist;
+programări specialist;
+calendar și disponibilitate specialist;
+dashboard administrator;
+administrare specialiști;
+supraveghere programări admin.
+
+Persistență și model de date
+
+Baza de date este relațională și folosește PostgreSQL. Modelele acoperă domeniile principale ale aplicației:
+
+utilizatori și identități de autentificare;
+sesiuni și mesaje de chat;
+analize emoționale și evenimente de risc;
+specialiști, recenzii și reguli de disponibilitate;
+programări;
+notificări;
+rapoarte și sumarizări zilnice.
+
+Implementarea backend-ului
+
+Configurare și inițializare
+
+Configurația backend-ului este centralizată și include, între altele:
+
+conexiunea la baza de date;
+cheia secretă pentru token-uri;
+cheia OpenAI;
+setările scheduler-ului;
+regulile de booking, anulare și reprogramare;
+configurația CORS.
+
+Această abordare permite separarea clară între rularea locală, testare și alte contexte operaționale.
+
+Autentificare și autorizare
+
+Autentificarea este implementată local, pe bază de email și parolă. Autorizarea se face pe roluri:
+
+user
+specialist
+admin
+
+Fluxul actual include:
+
+înregistrarea conturilor de utilizator;
+autentificarea și emiterea token-ului;
+rezolvarea utilizatorului curent;
+restricționarea explicită a rutelor pentru specialist și administrator.
+
+Domenii funcționale implementate
+
+Chat și interacțiune cu asistentul
+
+Backend-ul permite:
+
+creare sesiuni de chat;
+listare sesiuni existente;
+recuperarea sesiunii deschise;
+adăugare de interacțiuni utilizator-asistent;
+închiderea și arhivarea sesiunilor.
+
+Analiză emoțională și risc
+
+Serviciile dedicate se ocupă de:
+
+analiza mesajelor utilizatorului;
+generarea rezultatelor de mood;
+calcularea riscului;
+salvarea sumarizărilor zilnice;
+generarea evenimentelor de risc.
+
+Specialiști și disponibilitate
+
+Sistemul oferă:
+
+listare specialiști activi;
+profiluri publice detaliate;
+recenzii și rating;
+reguli de disponibilitate recurente;
+pauze recurente;
+intervale de time off;
+calcularea sloturilor disponibile.
+
+Programări
+
+Fluxul de programări acoperă atât perspectiva utilizatorului, cât și pe cea a specialistului. Sunt implementate reguli legate de:
+
+booking;
+confirmare;
+respingere;
+anulare;
+reprogramare;
+finalizare;
+reminder-e automate;
+sugestii de programări în situații critice.
+
+Notificări
+
+Sunt disponibile endpoint-uri pentru:
+
+listare;
+număr de notificări necitite;
+marcare citit și necitit;
+operații bulk;
+ștergere individuală și filtrată.
+
+Rapoarte și sumarizări
+
+Backend-ul generează:
+
+sumarizări zilnice de stare;
+rapoarte săptămânale;
+rapoarte lunare;
+rezumate sintetice bazate pe datele emoționale agregate.
+
+Implementarea frontend-ului
+
+Fluxuri publice și autentificare
+
+În interfața publică sunt implementate:
+
+pagina principală;
+login;
+înregistrare utilizator;
+resetare parolă;
+protecție pentru rutele guest-only;
+restaurarea sesiunii pe refresh.
+
+Înregistrarea publică este limitată intenționat la utilizatorii care caută suport. Conturile de specialist nu se creează prin acest flux.
+
+Zona utilizatorului
+
+Pentru utilizatorul autentificat sunt implementate:
+
+dashboard cu indicatori rapizi;
+navigație către chat, specialiști, programări, rapoarte, notificări și setări;
+chat AI cu sesiuni multiple;
+listarea specialiștilor și rezervarea unei programări;
+listarea și gestionarea programărilor proprii;
+rapoarte și sumarizări zilnice;
+pagina de notificări;
+pagina de setări și schimbarea parolei.
+
+Zona specialistului
+
+Pentru specialist sunt implementate:
+
+dashboard dedicat;
+listarea programărilor asociate;
+confirmare, respingere, reprogramare și finalizare programări;
+gestionarea disponibilității;
+gestionarea pauzelor și a intervalelor de indisponibilitate;
+acces la notificări și setări.
+
+Zona administratorului
+
+Pentru administrator sunt implementate:
+
+dashboard administrativ;
+administrarea specialiștilor;
+creare și activare/dezactivare specialist;
+consultarea și filtrarea programărilor;
+acces la notificări și setări.
+
+Seed demo și date de test
+
+Proiectul include un set de date ini-ial determinist pentru rulare locală și demonstrație. Acesta creează:
+
+conturi demo pentru administrator, specialist și utilizator;
+specialiști activi și un specialist inactiv;
+recenzii și date de rating;
+disponibilitate realistă;
+programări demonstrative;
+suficiente date pentru a popula dashboard-urile.
+
+Pe lângă seed, proiectul include:
+
+creare controlată de date E2E pentru Playwright;
+cur--are automat al datelor Playwright după rularea cu succes a suitei E2E;
+comandă manuală de cur--are pentru eliminarea datelor de test deja existente.
+
+Testare, calitate și validare
+
+Backend
+
+Backend-ul este validat prin:
+
+Ruff
+Pyright
+Pytest
+
+În starea curentă, suita backend include:
+
+149 de teste unitare și de integrare care trec cu succes.
+
+Frontend
+
+Frontend-ul este validat prin:
+
+npm run lint
+npm run build
+
+Testare end-to-end
+
+Fluxurile reale multi-rol sunt validate cu Playwright. În starea curentă, suita E2E include:
+
+19 teste care validează fluxuri complete pentru utilizator, specialist și administrator.
+
+Acestea acoperă, între altele:
+
+autentificarea pe roluri;
+booking, confirmare și filtrare programări;
+chat și rapoarte;
+notificări;
+administrarea specialiștilor;
+impactul disponibilității asupra sloturilor publice.
+
+Integrare continuă
+
+Proiectul include pipeline de validare prin GitHub Actions. Validările urmăresc consistența codului și stabilitatea principalelor fluxuri.
+
+Limitări actuale
+
+Limitările reale ale aplicației în starea actuală sunt:
+
+înregistrarea publică este disponibilă doar pentru utilizatori, nu pentru specialiști;
+nu există un flux public de aplicare și aprobare pentru specialiști;
+validarea completă a backend-ului pe anumite medii Windows poate necesita Docker din cauza particularităților psycopg;
+funcțiile de analiză și răspuns conversațional depind de configurarea corectă a cheii OpenAI;
+
+Concluzii
+
+În forma actuală, Mental Health Assistant este o aplicație full-stack coerentă, cu fluxuri implementate pentru toate cele trei roluri importante ale sistemului:
+
+utilizator;
+specialist;
+administrator.
+
+Punctele forte ale stadiului curent sunt:
+
+backend bine structurat și bine testat;
+frontend conectat la fluxurile reale de produs;
+acoperire E2E pentru scenarii critice;
+seed și cur--are pentru date locale;
+separare clară între zonele funcționale și roluri.
+
+Valoarea practică a aplicației, în starea actuală, constă în faptul că aceasta poate fi demonstrată și validată cap-coadă local, fără a depinde de dezvoltări majore suplimentare pentru fluxurile principale deja implementate.
+
+Bibliografie
 
 [1] FastAPI Documentation. https://fastapi.tiangolo.com/  
 [2] SQLAlchemy Documentation. https://docs.sqlalchemy.org/  
@@ -368,4 +577,3 @@ Direc?iile viitoare de dezvoltare sunt clare:
 [11] Docker Documentation. https://docs.docker.com/  
 [12] GitHub Actions Documentation. https://docs.github.com/actions  
 [13] OWASP Top 10. https://owasp.org/www-project-top-ten/
-

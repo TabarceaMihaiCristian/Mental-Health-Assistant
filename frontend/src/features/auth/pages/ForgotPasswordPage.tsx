@@ -40,7 +40,7 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell title="Reset access" subtitle="Request a password reset token for your account. In development, the reset link is shown directly because email delivery is not wired yet.">
+    <AuthShell title="Reset access" subtitle="Request a password reset link for your account.">
       <form className="grid gap-5" onSubmit={handleSubmit}>
         <TextField
           label="Email"
@@ -57,7 +57,7 @@ export function ForgotPasswordPage() {
             <p>{submittedMessage}</p>
             {resetUrl ? (
               <div className="mt-3 grid gap-2">
-                <p className="text-xs uppercase tracking-[0.24em] text-[--muted-foreground]">Development reset link</p>
+                <p className="text-xs uppercase tracking-[0.24em] text-[--muted-foreground]">Reset link</p>
                 <a href={resetUrl} className="break-all font-medium text-[--primary] hover:underline">
                   {resetUrl}
                 </a>

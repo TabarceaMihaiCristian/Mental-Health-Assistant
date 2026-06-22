@@ -11,6 +11,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+node_modules/
 downloads/
 eggs/
 .eggs/
@@ -106,3 +107,12 @@ poetry.lock
 
 # Project-specific
 backend/app/models/__pycache__/
+frontend/.tsbuild/
+*.tsbuildinfo
+manual_screenshots/
+playwright-report/
+test-results/
+frontend-figma-import/
+*.docx
+*.pptx
+~$*.docx

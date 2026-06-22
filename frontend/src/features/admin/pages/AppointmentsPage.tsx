@@ -133,7 +133,7 @@ export function AdminAppointmentsPage() {
                   <p className="font-semibold tracking-[-0.02em]">{appointment.user?.full_name ?? "Unknown user"}</p>
                   <p className="mt-1 text-sm text-[--muted-foreground]">{appointment.user?.email ?? "No user email"}</p>
                   <p className="mt-2 text-sm text-[--muted-foreground]">Specialist: {appointment.specialist?.full_name ?? "Unknown specialist"}</p>
-                  <p className="mt-1 text-sm text-[--muted-foreground]">{appointment.specialist?.specialty ?? "No specialty"} · {appointment.specialist?.city ?? "No city"}</p>
+                  <p className="mt-1 text-sm text-[--muted-foreground]">{appointment.specialist?.specialty ?? "No specialty"} - {appointment.specialist?.city ?? "No city"}</p>
                 </div>
                 <div className="text-right">
                   <Badge variant={badgeVariant(appointment.status)}>{toTitleCase(appointment.status)}</Badge>

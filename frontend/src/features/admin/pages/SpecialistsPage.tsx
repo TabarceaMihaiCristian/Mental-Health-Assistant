@@ -275,11 +275,11 @@ export function AdminSpecialistsPage() {
                   <div>
                     <p className="font-semibold tracking-[-0.02em]">{specialist.full_name}</p>
                     <p className="mt-1 text-sm text-[--muted-foreground]">{specialist.specialty}</p>
-                    <p className="mt-1 text-sm text-[--muted-foreground]">{specialist.city ?? "City not set"} · {specialist.email ?? "No email"}</p>
+                    <p className="mt-1 text-sm text-[--muted-foreground]">{specialist.city ?? "City not set"} - {specialist.email ?? "No email"}</p>
                   </div>
                   <Badge variant={badgeVariant(specialist.status)}>{toTitleCase(specialist.status)}</Badge>
                 </div>
-                <p className="mt-3 text-sm text-[--muted-foreground]">Modes: {specialist.consultation_modes.join(", ")} · Reviews: {specialist.review_count}</p>
+                <p className="mt-3 text-sm text-[--muted-foreground]">Modes: {specialist.consultation_modes.join(", ")} - Reviews: {specialist.review_count}</p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Button variant="secondary" size="sm" onClick={() => applySelectedSpecialist(specialist)}>Edit</Button>
                   <Button

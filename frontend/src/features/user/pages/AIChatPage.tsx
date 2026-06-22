@@ -390,7 +390,7 @@ export function AIChatPage() {
           {suggestions?.suggestions.map((item) => (
             <div key={`${item.specialist_id}-${item.start_datetime}`} className="rounded-[24px] border border-[--border] p-4">
               <p className="font-semibold">{item.specialist_name}</p>
-              <p className="mt-1 text-sm text-[--muted-foreground]">{item.specialty} · {item.city ?? "City not set"}</p>
+              <p className="mt-1 text-sm text-[--muted-foreground]">{item.specialty} - {item.city ?? "City not set"}</p>
               <p className="mt-1 text-sm text-[--muted-foreground]">{formatDateTime(item.start_datetime)}</p>
             </div>
           ))}
