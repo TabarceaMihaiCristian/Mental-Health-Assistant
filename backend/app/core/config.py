@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     assistant_max_context_messages: int = 12
     scheduler_enabled: bool = True
     scheduler_run_in_debug: bool = False
+    azure_demo_mode: bool = False
     appointment_reminder_interval_minutes: int = 15
     appointment_reminder_lead_hours: int = 24
     appointment_booking_min_notice_hours: int = 2

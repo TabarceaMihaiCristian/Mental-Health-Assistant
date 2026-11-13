@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.api.v1.routers import health
 from app.core.config import settings
 from app.jobs.scheduler import start_scheduler, stop_scheduler
 from app.utils.logging import (
@@ -137,7 +138,10 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     )
 
 
-app.include_router(api_router, prefix=settings.api_v1_prefix)
+if settings.azure_demo_mode:
+    app.include_router(health.router, prefix=f"{settings.api_v1_prefix}/health", tags=["health"])
+else:
+    app.include_router(api_router, prefix=settings.api_v1_prefix)
 log_event(
     logger,
     "app.started",
